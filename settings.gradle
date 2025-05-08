@@ -1,0 +1,3 @@
+rootProject.name = 'BizOnDam'
+
+include 'user-service', 'gateway-service', 'admin-service'
