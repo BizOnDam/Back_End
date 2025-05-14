@@ -1,21 +1,19 @@
-buildscript {
-    ext {
-        springBootVersion = '3.4.5'
-    }
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
-    }
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.4.5'
+    id 'io.spring.dependency-management' version '1.0.15.RELEASE'
 }
 
+// 루트에서 빌드 JAR 비활성화
+bootJar.enabled = false
+jar.enabled     = false
+
 allprojects {
-    group = 'com.example'
-    version = '0.0.1-SNAPSHOT'
+    group = 'com.msa'
 
     repositories {
         mavenCentral()
+        gradlePluginPortal()  // 플러그인 해석을 위해
     }
 }
 
@@ -30,14 +28,28 @@ subprojects {
         }
     }
 
+    // 서브프로젝트는 bootJar 생성, 일반 jar 비활성
+    bootJar.enabled = true
+    jar.enabled     = false
+
+    ext {
+        set('springCloudVersion', "2024.0.1")
+    }
+
     configurations {
         compileOnly {
             extendsFrom annotationProcessor
         }
     }
 
-    ext {
-        set('springCloudVersion', "2024.0.1")
+    dependencies {
+        implementation 'org.springframework.boot:spring-boot-starter'
+        implementation 'org.springframework.boot:spring-boot-starter-actuator'
+        implementation 'org.springframework.boot:spring-boot-starter-validation'
+        testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+        compileOnly      'org.projectlombok:lombok'
+        annotationProcessor 'org.projectlombok:lombok'
     }
 
     dependencyManagement {
