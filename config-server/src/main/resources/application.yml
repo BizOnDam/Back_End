@@ -1,0 +1,40 @@
+server:
+  port: 8888
+  shutdown: graceful
+  tomcat:
+    basedir: ./tomcat
+
+spring:
+  application:
+    name: config-server
+
+  profiles:
+    # Git 모드로 동작
+    active: git
+
+  cloud:
+    compatibility-verifier:
+      enabled: false
+
+    config:
+      server:
+        native:
+          enabled: false        # native 모드 비활성화
+        git:
+          uri: https://github.com/BizOnDam/config.git
+          default-label: ${CONFIG_LABEL:main}
+          searchPaths:
+            - config
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://eureka1:8761/eureka/,http://eureka2:8762/eureka/
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
