@@ -1,13 +1,13 @@
-package com.msa.gatewayservice;
+package com.msa.gatewayserver;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class GatewayServiceApplicationTests {
+class GatewayServerApplicationTests {
 
-  @Test
-  void contextLoads() {
-  }
+	@Test
+	void contextLoads() {
+	}
 
 }
