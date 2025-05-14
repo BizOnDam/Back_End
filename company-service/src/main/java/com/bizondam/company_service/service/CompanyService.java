@@ -26,6 +26,8 @@ public class CompanyService {
     // 기업 등록
     public void registerCompany(CompanyRequestDto dto) {
         if (isDuplicateBusinessNumber(dto.getBusinessNumber())) {   // 중복 체크
+            // TODO 500 뜨니까 401로 커스텀 예외 만들기
+            // 서버 오류 발생한 거 영어니까 한국어로 써주면 좋음
             throw new IllegalArgumentException("이미 등록된 사업자 번호입니다.");
         }
 

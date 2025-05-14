@@ -2,6 +2,7 @@ package com.bizondam.company_service.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.Persistent;
 
 import java.time.LocalDateTime;
 
@@ -61,5 +62,6 @@ public class Company {
     private String businessType;
 
     // 둥록 일시
+    @Persistent
     private LocalDateTime createdAt;
 }
