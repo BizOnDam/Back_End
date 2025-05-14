@@ -1,3 +1,6 @@
 rootProject.name = 'BizOnDam'
 
-include 'user-service', 'gateway-service', 'admin-service'
+include 'user-service'
+include 'gateway-server'
+include 'config-server'
+include 'eureka-server'
