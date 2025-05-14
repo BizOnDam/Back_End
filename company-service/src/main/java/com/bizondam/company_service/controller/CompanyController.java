@@ -26,6 +26,7 @@ public class CompanyController {
     private final NationalTaxClient nationalTaxClient;
 
     @PostMapping
+    //TODO 반환 된다면 다 타입 dto로 바꾸기
     public ResponseEntity<String> registerCompany(@RequestBody CompanyRequestDto dto) {
         companyService.registerCompany(dto);
         return ResponseEntity.ok("등록 완료");
@@ -34,7 +35,7 @@ public class CompanyController {
     @GetMapping("/check")
     public ResponseEntity<Boolean> checkDuplicate(@RequestParam String businessNumber) {
         boolean isDuplicate = companyService.isDuplicateBusinessNumber(businessNumber);
-
+        // TODO 예외처리
         if (isDuplicate) {
             logger.info("이미 등록된 사업자 번호입니다.");  // 등록된 경우 콘솔에 출력
         } else {

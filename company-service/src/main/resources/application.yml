@@ -1,14 +1,18 @@
 spring:
   application:
     name: company-service # 마이크로서비스 이름
+
   datasource:
     url: jdbc:mysql://localhost:3306/bizondam
-    username: root
-    password: Qlvh0423!
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
   jpa:
     hibernate:
       ddl-auto: none  # DB 구조를 자동 생성/변겅 안 함
     show-sql: true  # 콘솔에 SQL 쿼리 로그 출력
+    database-platform: org.hibernate.dialect.MySQL8Dialect
 
   # 컨피그 잠깐 끄기
   cloud:
@@ -33,7 +37,7 @@ management:
 # API 키 등록
 national-tax:
   api-url: https://api.odcloud.kr/api/nts-businessman/v1/validate
-  service-key: "nrIaYF70BLc+Bv+Z4enmLXpYabahSv48DLqbb/DRjz3c5ET7PUp4HenOLmrVNJER0Qv0DntIOiSvCdWecnVSXg=="
+  service-key: ${NATIONAL_TAX_API_KEY}
   return-type: JSON
 
 
