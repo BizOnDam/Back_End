@@ -1,4 +1,4 @@
-package com.msa.userservice;
+package com.msa.test1;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -6,8 +6,8 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
 @EnableDiscoveryClient
 @SpringBootApplication
-public class UserServiceApplication {
+public class Test1Application {
   public static void main(String[] args) {
-    SpringApplication.run(UserServiceApplication.class, args);
+    SpringApplication.run(Test1Application.class, args);
   }
 }
