@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bizondam.publicdata_service.mapper.ProcurementHistoryMapper">
+
+    <resultMap id="HistoryResult" type="com.bizondam.publicdata_service.domain.ProcurementHistory">
+        <id     property="historyId"        column="history_id"/>
+        <result property="supplierBizno"    column="supplier_bizno"/>
+        <result property="supplierName"     column="supplier_name"/>
+        <result property="supplierType"     column="supplier_type"/>
+        <result property="unitPrice"        column="unit_price"/>
+        <result property="quantity"         column="quantity"/>
+        <result property="unit"             column="unit"/>
+        <result property="totalAmount"      column="total_amount"/>
+        <result property="increaseQuantity" column="increase_quantity"/>
+        <result property="increaseAmount"   column="increase_amount"/>
+        <result property="finalChangeOrder" column="final_change_order"/>
+        <result property="changeOrder"      column="change_order"/>
+        <result property="excellentProductYn"    column="excellent_product_yn"/>
+        <result property="directPurchaseYn"      column="direct_purchase_yn"/>
+        <result property="masYn"             column="mas_yn"/>
+        <result property="masTwoStepYn"      column="mas_two_step_yn"/>
+        <result property="unitContractNo"    column="unit_contract_no"/>
+        <result property="unitContractChangeOrder" column="unit_contract_change_order"/>
+        <result property="deliveryCondition" column="delivery_condition"/>
+        <result property="createdAt"         column="created_at"/>
+        <!-- contract, product association 매핑이 필요하면 추가하세요 -->
+    </resultMap>
+
+    <insert id="insertHistory" parameterType="com.bizondam.publicdata_service.domain.ProcurementHistory" useGeneratedKeys="true" keyProperty="historyId" keyColumn="history_id">
+        INSERT INTO procurement_history
+        (contract_id, product_id, supplier_bizno, supplier_name,
+         supplier_type, unit_price, quantity, unit, total_amount,
+         increase_quantity, increase_amount, final_change_order,
+         change_order, excellent_product_yn, direct_purchase_yn,
+         mas_yn, mas_two_step_yn, unit_contract_no,
+         unit_contract_change_order, delivery_condition, created_at)
+        VALUES
+            (#{contract.contractId}, #{product.productId}, #{supplierBizno}, #{supplierName},
+             #{supplierType}, #{unitPrice}, #{quantity}, #{unit}, #{totalAmount},
+             #{increaseQuantity}, #{increaseAmount}, #{finalChangeOrder},
+             #{changeOrder}, #{excellentProductYn}, #{directPurchaseYn},
+             #{masYn}, #{masTwoStepYn}, #{unitContractNo},
+             #{unitContractChangeOrder}, #{deliveryCondition}, #{createdAt})
+    </insert>
+
+    <resultMap id="SupplierCountMap" type="com.bizondam.publicdata_service.mapper.ProcurementHistoryMapper$SupplierCount">
+        <result property="supplierBizno" column="supplier_bizno"/>
+        <result property="supplierName" column="supplier_name"/>
+        <result property="regionName" column="region_name"/>
+        <result property="cnt" column="cnt"/>
+    </resultMap>
+
+    <select id="countBySupplierForProduct" parameterType="String" resultMap="SupplierCountMap">
+        SELECT h.supplier_bizno,
+               h.supplier_name,
+               c.region_name,
+               COUNT(*) AS cnt
+        FROM procurement_history h
+                 JOIN procurement_contract c ON h.contract_id = c.contract_id
+        WHERE h.product_id = #{productId}
+        GROUP BY h.supplier_bizno, h.supplier_name, c.region_name
+        ORDER BY cnt DESC
+    </select>
+
+    <select id="selectAll"
+            resultType="com.bizondam.publicdata_service.domain.ProcurementHistory">
+        SELECT * FROM procurement_history
+    </select>
+</mapper>

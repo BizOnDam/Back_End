@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bizondam.publicdata_service.mapper.ProcurementContractMapper">
+
+    <resultMap id="ContractResult" type="com.bizondam.publicdata_service.domain.ProcurementContract">
+        <id     property="contractId"         column="contract_id"/>
+        <result property="contractRequestNo" column="contract_request_no"/>
+        <result property="contractName"      column="contract_name"/>
+        <result property="contractMethod"    column="contract_method"/>
+        <result property="contractDivision"  column="contract_division"/>
+        <result property="procurementDivision" column="procurement_division"/>
+        <result property="deliveryDivision"  column="delivery_division"/>
+        <result property="contractDate"      column="contract_date"/>
+        <result property="firstContractDate" column="first_contract_date"/>
+        <result property="deliveryDeadline"  column="delivery_deadline"/>
+        <result property="deliveryPlace"     column="delivery_place"/>
+        <result property="institutionName"   column="institution_name"/>
+        <result property="institutionType"   column="institution_type"/>
+        <result property="regionName"        column="region_name"/>
+        <result property="institutionCode"   column="institution_code"/>
+        <result property="createdAt"         column="created_at"/>
+    </resultMap>
+
+    <insert id="upsert" parameterType="com.bizondam.publicdata_service.domain.ProcurementContract" useGeneratedKeys="true" keyProperty="contractId" keyColumn="contract_id">
+        INSERT INTO procurement_contract
+        (contract_request_no, contract_name, contract_method, contract_division,
+        procurement_division, delivery_division, contract_date, first_contract_date,
+        delivery_deadline, delivery_place, institution_name, institution_type,
+        region_name, institution_code, created_at)
+        VALUES
+        (#{contractRequestNo}, #{contractName}, #{contractMethod}, #{contractDivision},
+        #{procurementDivision}, #{deliveryDivision}, #{contractDate}, #{firstContractDate},
+        #{deliveryDeadline}, #{deliveryPlace}, #{institutionName}, #{institutionType},
+        #{regionName}, #{institutionCode}, #{createdAt})
+        ON DUPLICATE KEY UPDATE
+        contract_name        = VALUES(contract_name),
+        contract_method      = VALUES(contract_method),
+        contract_division    = VALUES(contract_division),
+        procurement_division = VALUES(procurement_division),
+        delivery_division    = VALUES(delivery_division),
+        contract_date        = VALUES(contract_date),
+        first_contract_date  = VALUES(first_contract_date),
+        delivery_deadline    = VALUES(delivery_deadline),
+        delivery_place       = VALUES(delivery_place),
+        institution_name     = VALUES(institution_name),
+        institution_type     = VALUES(institution_type),
+        region_name          = VALUES(region_name),
+        institution_code     = VALUES(institution_code)
+    </insert>
+
+    <select id="selectByRequestNo" parameterType="String" resultMap="ContractResult">
+        SELECT *
+        FROM procurement_contract
+        WHERE contract_request_no = #{requestNo}
+    </select>
+
+    <select id="selectAll" resultMap="ContractResult">
+        SELECT * FROM procurement_contract
+    </select>
+
+</mapper>

@@ -1,0 +1,56 @@
+spring:
+  application:
+    name: publicdata-service  # 서비스 이름
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/bizondam
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: none            # schema 자동생성/수정 비활성
+    show-sql: true              # 실행 SQL 로깅
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+
+  cloud:
+    config:
+      enabled: false            # TODO Config Server
+
+# MyBatis 설정
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+#  config-location: classpath:mybatis-config.xml
+
+# Eureka 클라이언트
+eureka:
+  client:
+    enabled: false
+    # service-url:
+    #   defaultZone: http://localhost:8761/eureka/
+  # instance:
+  #   prefer-ip-address: true  # IP 우선 등록
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"            # 모든 매니지먼트 엔드포인트 활성
+
+# 공공데이터 API (종합쇼핑몰 품목정보)
+pps-prdctinfo:
+  api-url: https://apis.data.go.kr/1230000/at/ShoppingMallPrdctInfoService/getSpcifyPrdlstPrcureInfoList
+  service-key: nrIaYF70BLc+Bv+Z4enmLXpYabahSv48DLqbb/DRjz3c5ET7PUp4HenOLmrVNJER0Qv0DntIOiSvCdWecnVSXg==
+#  service-key: nrIaYF70BLc%2BBv%2BZ4enmLXpYabahSv48DLqbb%2FDRjz3c5ET7PUp4HenOLmrVNJER0Qv0DntIOiSvCdWecnVSXg%3D%3D
+  return-type: json
+
+# Swagger / Springdoc 설정
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html     # http://localhost:8080/swagger-ui/index.html
+    groups-order: DESC
+    tags-sorter: alpha
+    operations-sorter: method
+  paths-to-match:
+    - /api/**
