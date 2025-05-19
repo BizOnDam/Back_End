@@ -25,5 +25,4 @@ public interface ProcurementHistoryMapper {
         private String regionName;
         private long   cnt;
     }
-
 }

@@ -1,6 +1,9 @@
+server:
+  port: 8083
+
 spring:
   application:
-    name: publicdata-service  # 서비스 이름
+    name: publicdata-service
 
   datasource:
     url: jdbc:mysql://localhost:3306/bizondam
@@ -26,23 +29,20 @@ mybatis:
 # Eureka 클라이언트
 eureka:
   client:
-    enabled: false
-    # service-url:
-    #   defaultZone: http://localhost:8761/eureka/
-  # instance:
-  #   prefer-ip-address: true  # IP 우선 등록
+    service-url:
+      enabled: false
+#      defaultZone: http://localhost:8761/eureka/,http://localhost:8762/eureka/ # TODO Eureka
 
 management:
   endpoints:
     web:
-      exposure:
+       exposure:
         include: "*"            # 모든 매니지먼트 엔드포인트 활성
 
 # 공공데이터 API (종합쇼핑몰 품목정보)
 pps-prdctinfo:
   api-url: https://apis.data.go.kr/1230000/at/ShoppingMallPrdctInfoService/getSpcifyPrdlstPrcureInfoList
-  service-key: nrIaYF70BLc+Bv+Z4enmLXpYabahSv48DLqbb/DRjz3c5ET7PUp4HenOLmrVNJER0Qv0DntIOiSvCdWecnVSXg==
-#  service-key: nrIaYF70BLc%2BBv%2BZ4enmLXpYabahSv48DLqbb%2FDRjz3c5ET7PUp4HenOLmrVNJER0Qv0DntIOiSvCdWecnVSXg%3D%3D
+  service-key: nrIaYF70BLc%2BBv%2BZ4enmLXpYabahSv48DLqbb%2FDRjz3c5ET7PUp4HenOLmrVNJER0Qv0DntIOiSvCdWecnVSXg%3D%3D
   return-type: json
 
 # Swagger / Springdoc 설정

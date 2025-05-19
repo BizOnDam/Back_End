@@ -67,9 +67,9 @@ public class ProcurementService {
                     .contractDivision(item.getCntrctDivNm())
                     .procurementDivision(item.getPrcrmntDivNm())
                     .deliveryDivision(item.getCntrctDlvrDivNm())
-                    .contractDate(LocalDate.parse(item.getCntrctDlvrReqDate(), DATE_FMT))
-                    .firstContractDate(LocalDate.parse(item.getIntlCntrctDlvrReqDate(), DATE_FMT))
-                    .deliveryDeadline(LocalDate.parse(item.getDlvrTmlmtDate(), DATE_FMT))
+                    .contractDate(parseDate(item.getCntrctDlvrReqDate()))
+                    .firstContractDate(parseDate(item.getIntlCntrctDlvrReqDate()))
+                    .deliveryDeadline(parseDate(item.getDlvrTmlmtDate()))
                     .deliveryPlace(item.getDlvrPlceNm())
                     .institutionName(item.getDminsttNm())
                     .institutionType(item.getDmndInsttDivNm())
@@ -110,6 +110,12 @@ public class ProcurementService {
             historyMapper.insertHistory(ph);
         });
 
+    }
+
+    // 안전한 날짜 파싱
+    private LocalDate parseDate(String dateStr) {
+        if (dateStr == null || dateStr.isBlank()) return null;
+        return LocalDate.parse(dateStr, DATE_FMT);
     }
 
     //품목 메타정보만 조회
