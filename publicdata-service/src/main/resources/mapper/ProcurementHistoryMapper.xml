@@ -24,7 +24,6 @@
         <result property="unitContractChangeOrder" column="unit_contract_change_order"/>
         <result property="deliveryCondition" column="delivery_condition"/>
         <result property="createdAt"         column="created_at"/>
-        <!-- contract, product association 매핑이 필요하면 추가하세요 -->
     </resultMap>
 
     <insert id="insertHistory" parameterType="com.bizondam.publicdata_service.domain.ProcurementHistory" useGeneratedKeys="true" keyProperty="historyId" keyColumn="history_id">

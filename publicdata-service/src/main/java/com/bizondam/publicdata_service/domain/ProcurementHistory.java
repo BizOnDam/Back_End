@@ -2,7 +2,6 @@ package com.bizondam.publicdata_service.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.time.LocalDateTime;
 
 @Entity

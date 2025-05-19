@@ -8,7 +8,6 @@ import lombok.Setter;
 public class ProcurementRequestDto {
 
     // 필수 파라미터
-//    private String serviceKey;      // 공공데이터포털 인증키
     private int numOfRows;          // 한 페이지 결과 수
     private int pageNo;             // 페이지 번호
     private String inqryDiv;        // 조회구분 (1: 계약일자 기준, 2: 최초계약일자 기준)

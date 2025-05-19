@@ -3,8 +3,6 @@ package com.bizondam.publicdata_service.client;
 import com.bizondam.publicdata_service.dto.ProcurementRequestDto;
 import com.bizondam.publicdata_service.dto.ProcurementResponseDto;
 import com.bizondam.publicdata_service.dto.ProcurementResponseWrapper;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import org.springframework.http.HttpHeaders;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpEntity;
@@ -36,13 +34,11 @@ public class ProcurementClient {
 
     // 조달청 API 호출
     public ProcurementResponseDto fetchContracts(ProcurementRequestDto requestDto) {
-        String encodedServiceKey = URLEncoder.encode(serviceKey, StandardCharsets.UTF_8);
-        System.err.println("▶ API 키: " + encodedServiceKey);
 
         // URI
         UriComponentsBuilder builder = UriComponentsBuilder
             .fromHttpUrl(apiUrl)
-            .queryParam("ServiceKey", encodedServiceKey)
+            .queryParam("ServiceKey", serviceKey)
             .queryParam("type", returnType)
             .queryParam("numOfRows", requestDto.getNumOfRows())
             .queryParam("pageNo",     requestDto.getPageNo())
@@ -67,7 +63,6 @@ public class ProcurementClient {
         addQueryParamIfPresent(builder, "exclcProdctYn", requestDto.getExclcProdctYn());
         addQueryParamIfPresent(builder, "cnstwkMtrlDrctPurchsObjYn", requestDto.getCnstwkMtrlDrctPurchsObjYn());
 
-
         URI uri = builder
             .build(true)
             .toUri();
@@ -85,11 +80,12 @@ public class ProcurementClient {
 
         ProcurementResponseWrapper wrapper = response.getBody();
         System.err.println("▶ response: " + response);
+
+        //TODO 로그 처리 자세하게 바꾸기
         if (wrapper == null || wrapper.getResponse() == null || wrapper.getResponse().getBody() == null) {
             log.warn("응답 결과 wrapper or response 없음");
             return null;
         }
-
         return wrapper.getResponse();
     }
 
