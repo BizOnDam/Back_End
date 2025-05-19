@@ -29,7 +29,7 @@ public class CompanyResponseDto {   // 기업 정보 조회 및 등록 후 응�
         this.companyNameEn = company.getCompanyNameEn();
         this.ceoNameKr = company.getCeoNameKr();
         this.ceoNameEn = company.getCeoNameEn();
-        this.startDate = company.getCreatedAt().toString();
+        this.startDate = company.getStartDate();
         this.businessNumber = company.getBusinessNumber();
         this.phoneNumber = company.getPhoneNumber();
         this.faxNumber = company.getFaxNumber();

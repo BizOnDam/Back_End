@@ -40,8 +40,6 @@ national-tax:
   service-key: ${NATIONAL_TAX_API_KEY}
   return-type: JSON
 
-
-# TODO 스웨거 최상위 파일로 옮기기
 springdoc:
   swagger-ui:
     path: /swagger-ui.html # swagger-ui 접근 경로에 대한 별칭, 해당 주소로 접속해도 http://localhost:8080/swagger-ui/index.html로 리다이렉션 됨.
