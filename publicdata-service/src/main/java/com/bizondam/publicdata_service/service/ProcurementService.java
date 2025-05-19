@@ -7,6 +7,7 @@ import com.bizondam.publicdata_service.domain.ProductMeta;
 import com.bizondam.publicdata_service.dto.*;
 import com.bizondam.publicdata_service.mapper.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,6 +17,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class ProcurementService {
 
@@ -31,6 +33,14 @@ public class ProcurementService {
         // 1) OpenAPI 호출 & 저장
         ProcurementResponseDto raw = client.fetchContracts(req);
 
+        if (raw == null
+            || raw.getBody() == null
+            || raw.getBody().getItems() == null
+            || raw.getBody().getItems().isEmpty()) {
+            log.warn("OpenAPI 응답 없음: {}", raw);
+            return;
+        }
+
         raw.getBody().getItems().forEach(item -> {
             // 1-1) product_meta upsert
             ProductMeta pm = ProductMeta.builder()
@@ -44,6 +54,10 @@ public class ProcurementService {
                     .createdAt(LocalDateTime.now())
                     .build();
             metaMapper.upsert(pm);
+            if (pm.getProductId() == null) {
+                log.error("product_meta upsert 실패: {}", pm);
+                return;  // 혹은 예외 던지기
+            }
 
             // 1-2) procurement_contract upsert
             ProcurementContract pc = ProcurementContract.builder()
@@ -64,6 +78,10 @@ public class ProcurementService {
                     .createdAt(LocalDateTime.now())
                     .build();
             contractMapper.upsert(pc);
+            if (pc.getContractId() == null) {
+                log.error("procurement_contract upsert 실패: {}", pc);
+                return;
+            }
 
             // 1-3) procurement_history insert
             ProcurementHistory ph = ProcurementHistory.builder()
@@ -72,7 +90,7 @@ public class ProcurementService {
                     .supplierBizno(item.getBizno())
                     .supplierName(item.getCorpNm())
                     .supplierType(item.getCorpEntrprsDivNmNm())
-                    .unitPrice(Integer.parseInt(item.getPrdctUprc()))
+                    .unitPrice(parseInt(item.getPrdctUprc()))
                     .quantity(Integer.parseInt(item.getPrdctQty()))
                     .unit(item.getPrdctUnit())
                     .totalAmount(Integer.parseInt(item.getPrdctAmt()))
@@ -92,32 +110,6 @@ public class ProcurementService {
             historyMapper.insertHistory(ph);
         });
 
-        // 2) 저장된 엔티티/집계 결과 조회 후 DTO 변환
-//
-//        List<ProductMetaDto> metas = metaMapper
-//                .selectAll()
-//                .stream()
-//                .map(ProductMetaDto::from)
-//                .toList();
-//
-//        List<ProcurementContractDto> contracts = contractMapper
-//                .selectAll()
-//                .stream()
-//                .map(ProcurementContractDto::from)
-//                .toList();
-//
-//        List<ProcurementHistoryDto> histories = historyMapper
-//                .selectAll()
-//                .stream()
-//                .map(ProcurementHistoryDto::from)  // 엔티티 기준 from(ProcurementHistory)
-//                .toList();
-//
-//        // 3) 통합 DTO 빌드
-//        return ProcurementSyncResponseDto.builder()
-//                .productMetas(metas)
-//                .contracts(contracts)
-//                .histories(histories)
-//                .build();
     }
 
     //품목 메타정보만 조회

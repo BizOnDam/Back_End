@@ -1,7 +1,6 @@
 package com.bizondam.publicdata_service.dto;
 
 import com.bizondam.publicdata_service.domain.ProcurementHistory;
-import com.bizondam.publicdata_service.mapper.ProcurementHistoryMapper;
 import lombok.*;
 
 @Getter

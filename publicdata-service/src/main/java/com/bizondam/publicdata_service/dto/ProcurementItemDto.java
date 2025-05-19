@@ -1,6 +1,7 @@
 package com.bizondam.publicdata_service.dto;
 
 import lombok.Data;
+
 @Data
 public class ProcurementItemDto {
     private String prcrmntDivNm;
@@ -24,7 +25,6 @@ public class ProcurementItemDto {
     private String prdctQty;
     private String prdctUnit;
     private String prdctAmt;
-    private String bizno;
     private String corpNm;
     private String corpEntrprsDivNmNm;
     private String cntrctDlvrReqNm;
@@ -40,5 +40,6 @@ public class ProcurementItemDto {
     private String incdecAmt;
     private String dlvrPlceNm;
     private String dlvrTmlmtDate;
+    private String bizno;
     private String dlvryCndtnNm;
 }

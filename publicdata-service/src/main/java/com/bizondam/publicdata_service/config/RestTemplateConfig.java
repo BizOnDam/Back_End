@@ -8,9 +8,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
-import com.bizondam.publicdata_service.client.ProcurementResponseErrorHandler;
-
-import java.util.List;
 
 @Configuration
 public class RestTemplateConfig {
@@ -19,11 +16,12 @@ public class RestTemplateConfig {
     public RestTemplate restTemplate(RestTemplateBuilder builder) {
         // 1) XmlMapper 세팅
         XmlMapper xmlMapper = new XmlMapper();
-        xmlMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false); // 알 수 없는 속성(Fail on unknown)을 끔
+        xmlMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,
+            false); // 알 수 없는 속성(Fail on unknown)을 끔
 
         // 2) XML 메시지 컨버터 생성
         MappingJackson2XmlHttpMessageConverter xmlConverter =
-                new MappingJackson2XmlHttpMessageConverter(xmlMapper);
+            new MappingJackson2XmlHttpMessageConverter(xmlMapper);
 
         // 3) RestTemplate에 컨버터 등록
         RestTemplate restTemplate = new RestTemplate();
@@ -31,10 +29,6 @@ public class RestTemplateConfig {
         restTemplate.getMessageConverters().add(0, xmlConverter);
 
         return restTemplate;
-
-//        return builder
-//                .messageConverters(xmlConv)  // XML 컨버터 등록
-//                .build();
     }
 
     @Bean
@@ -43,14 +37,4 @@ public class RestTemplateConfig {
         xmlMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         return new MappingJackson2XmlHttpMessageConverter(xmlMapper);
     }
-
-
-//    @Bean
-////    @Primary
-//    public RestTemplate restTemplate(RestTemplateBuilder builder, ProcurementResponseErrorHandler errorHandler) {
-//        return builder
-//                .errorHandler(errorHandler)
-////                .additionalMessageConverters(new Jaxb2RootElementHttpMessageConverter()) // XML 컨버터 추가
-//                .build();
-//    }
 }
