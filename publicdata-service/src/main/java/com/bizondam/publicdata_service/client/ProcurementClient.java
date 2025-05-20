@@ -14,7 +14,10 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.util.UriComponentsBuilder;
 import lombok.extern.slf4j.Slf4j;
+
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.net.URLEncoder;
 
 @Slf4j
 @Component
@@ -91,7 +94,12 @@ public class ProcurementClient {
 
     private void addQueryParamIfPresent(UriComponentsBuilder builder, String key, String value) {
         if (StringUtils.hasText(value)) {
-            builder.queryParam(key, value);
+            try {
+                String encodedValue = URLEncoder.encode(value, "UTF-8");
+                builder.queryParam(key, encodedValue);
+            } catch (UnsupportedEncodingException e) {
+                throw new RuntimeException("UTF-8 인코딩 실패", e);
+            }
         }
     }
 }
