@@ -77,10 +77,19 @@ public class ProcurementService {
                     .institutionCode(item.getDminsttCd())
                     .createdAt(LocalDateTime.now())
                     .build();
-            contractMapper.upsert(pc);
-            if (pc.getContractId() == null) {
-                log.error("procurement_contract upsert 실패: {}", pc);
+            try {
+                log.debug("▶ upsert 대상 contractRequestNo: {}", pc.getContractRequestNo());
+                log.debug("▶ 계약 정보: {}", pc);
+                contractMapper.upsert(pc);
+                ProcurementContract saved = contractMapper.selectByRequestNo(pc.getContractRequestNo());
+                pc.setContractId(saved.getContractId());
+            } catch (Exception e) {
+                log.error("▶ procurement_contract upsert 실패: {}", pc);
+                log.error("▶ 예외 메시지: ", e);
                 return;
+            }
+            if (pc.getContractId() == null) {
+                log.error("▶ upsert 후 contractId가 null 입니다. {}", pc);
             }
 
             // 1-3) procurement_history insert
