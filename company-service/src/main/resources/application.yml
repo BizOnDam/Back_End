@@ -1,50 +1,18 @@
-server:
-  port: 8082
-
 spring:
   application:
     name: company-service
+  profiles:
+    active: dev
+  config:
+    import:
+      - "optional:configserver:http://admin:1234@localhost:8888"
 
-  datasource:
-    url: jdbc:mysql://localhost:3306/bizondam
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
-    driver-class-name: com.mysql.cj.jdbc.Driver
-
-  jpa:
-    hibernate:
-      ddl-auto: none  # DB 구조를 자동 생성/변겅 안 함
-    show-sql: true  # 콘솔에 SQL 쿼리 로그 출력
-    database-platform: org.hibernate.dialect.MySQL8Dialect
-
-  # 컨피그 잠깐 끄기
-  cloud:
-    config:
-      enabled: false
-
-# Eureka 서버 등록 설정
-eureka:
-  client:
-    service-url:
-      defaultZone: http://localhost:8761/eureka/,http://localhost:8762/eureka/
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: "*"  # 모니터링 엔드포인트 활성화
+mybatis:
+  mapper-locations: classpath:mapper/**/*.xml
+  type-aliases-package: com.msa.company-service.domain
 
 # API 키 등록
 national-tax:
   api-url: https://api.odcloud.kr/api/nts-businessman/v1/validate
   service-key: ${NATIONAL_TAX_API_KEY}
   return-type: JSON
-
-springdoc:
-  swagger-ui:
-    path: /swagger-ui.html # swagger-ui 접근 경로에 대한 별칭, 해당 주소로 접속해도 http://localhost:8080/swagger-ui/index.html로 리다이렉션 됨.
-    groups-order: DESC # path, query, body, response 순으로 출력
-    tags-sorter: alpha # 태그를 알파벳 순으로 정렬
-    operations-sorter: method  # delete - get - patch - post - put 순으로 정렬, alpha를 사용하면 알파벳 순으로 정렬 가능
-  paths-to-match:
-    - /api/** # swagger-ui에 표시할 api의 엔드포인트 패턴

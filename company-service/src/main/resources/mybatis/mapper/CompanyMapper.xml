@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bizondam.company_service.mapper.CompanyMapper">
+
+  <!-- 사업자번호 기준 조회 -->
+  <select id="selectByBusinessNumber"
+    parameterType="string"
+    resultType="com.bizondam.company_service.domain.Company">
+    SELECT *
+    FROM companies
+    WHERE business_number = #{businessNumber}
+  </select>
+
+  <!-- insert 후 생성된 PK를 companyId 필드에 설정 -->
+  <insert id="insertCompany"
+    parameterType="com.bizondam.company_service.domain.Company"
+    useGeneratedKeys="true"
+    keyProperty="companyId"
+    keyColumn="company_id">
+    INSERT INTO companies
+    (company_name_kr, company_name_en,
+     ceo_name_kr,     ceo_name_en,
+     start_date,      business_number,
+     phone_number,    fax_number,
+     postcode,        address,
+     address_detail,  business_type,
+     created_at)
+    VALUES
+      (#{companyNameKr}, #{companyNameEn},
+       #{ceoNameKr},     #{ceoNameEn},
+       #{startDate},     #{businessNumber},
+       #{phoneNumber},   #{faxNumber},
+       #{postcode},      #{address},
+       #{addressDetail}, #{businessType},
+       #{createdAt})
+  </insert>
+
+  <!-- company_id 기준 단건 조회 -->
+  <select id="selectCompanyById"
+    parameterType="long"
+    resultType="com.bizondam.company_service.domain.Company">
+    SELECT *
+    FROM companies
+    WHERE company_id = #{companyId}
+  </select>
+
+  <!-- 전체 조회 -->
+  <select id="selectAllCompanies"
+    resultType="com.bizondam.company_service.domain.Company">
+    SELECT *
+    FROM companies
+  </select>
+
+  <!-- 수정 -->
+  <update id="updateCompany"
+    parameterType="com.bizondam.company_service.domain.Company">
+    UPDATE companies
+    SET company_name_kr  = #{companyNameKr},
+        company_name_en  = #{companyNameEn},
+        ceo_name_kr      = #{ceoNameKr},
+        ceo_name_en      = #{ceoNameEn},
+        start_date       = #{startDate},
+        business_number  = #{businessNumber},
+        phone_number     = #{phoneNumber},
+        fax_number       = #{faxNumber},
+        postcode         = #{postcode},
+        address          = #{address},
+        address_detail   = #{addressDetail},
+        business_type    = #{businessType}
+    WHERE company_id = #{companyId}
+  </update>
+
+  <!-- 삭제 -->
+  <delete id="deleteCompany"
+    parameterType="long">
+    DELETE
+    FROM companies
+    WHERE company_id = #{companyId}
+  </delete>
+
+</mapper>

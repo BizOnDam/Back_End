@@ -1,59 +1,40 @@
 package com.bizondam.company_service.controller;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import io.swagger.v3.oas.annotations.tags.Tag;
-
 import com.bizondam.company_service.client.NationalTaxClient;
-import com.bizondam.company_service.dto.CompanyRequestDto;
-import com.bizondam.company_service.dto.CompanyResponseDto;
-import com.bizondam.company_service.dto.CompanyValidationRequestDto;
+import com.bizondam.company_service.dto.*;
 import com.bizondam.company_service.service.CompanyService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 
 @Tag(name = "기업 등록 API", description = "기업 정보 등록 및 조회 관련 API")
 @RestController
 @RequestMapping("/api/companies")
 @RequiredArgsConstructor
 public class CompanyController {
-
-    private static final Logger logger = LoggerFactory.getLogger(CompanyController.class);  // Logger 객체 생성
-
     private final CompanyService companyService;
     private final NationalTaxClient nationalTaxClient;
 
-    @PostMapping
-    //TODO 반환 된다면 다 타입 dto로 바꾸기
-    public ResponseEntity<String> registerCompany(@RequestBody CompanyRequestDto dto) {
-        companyService.registerCompany(dto);
-        return ResponseEntity.ok("등록 완료");
+    @PostMapping("/register")
+    public ResponseEntity<Long> registerCompany(@RequestBody CompanyRequest dto) {
+        Long companyId = companyService.createCompany(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(companyId);
     }
 
-    @GetMapping("/check")
-    public ResponseEntity<Boolean> checkDuplicate(@RequestParam String businessNumber) {
-        boolean isDuplicate = companyService.isDuplicateBusinessNumber(businessNumber);
-        // TODO 예외처리
-        if (isDuplicate) {
-            logger.info("이미 등록된 사업자 번호입니다.");  // 등록된 경우 콘솔에 출력
-        } else {
-            logger.info("등록 가능한 사업자 번호입니다.");  // 등록되지 않은 경우 콘솔에 출력
-        }
-
-        return ResponseEntity.ok(isDuplicate);
-//        return ResponseEntity.ok(companyService.isDuplicateBusinessNumber(businessNumber));
-    }
-
+    // 회사 단건 조회
     @GetMapping("/{id}")
-    public ResponseEntity<CompanyResponseDto> getCompany(@PathVariable Long id) {
-        return ResponseEntity.ok(companyService.getCompany(id));
+    public ResponseEntity<CompanyResponse> getCompanyById(@PathVariable Long id) {
+        CompanyResponse dto = companyService.getCompanyById(id);
+        return ResponseEntity.ok(dto);
     }
 
+    // 국세청 사업자 등록 번호 검증
     @PostMapping("/validate")
-    public ResponseEntity<Boolean> validateBusiness(@RequestBody CompanyValidationRequestDto dto) {
+    public ResponseEntity<Boolean> validateBusiness(@RequestBody CompanyValidationRequest dto) {
         boolean result = nationalTaxClient.verify(dto);
         return ResponseEntity.ok(result);
     }
 }
+

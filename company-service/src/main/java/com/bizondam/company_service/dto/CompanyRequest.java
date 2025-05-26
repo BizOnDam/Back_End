@@ -5,8 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class CompanyRequestDto {  // 프론트에서 기업 등록 요정을 보낼 때 사용
-
+public class CompanyRequest {  // 프론트에서 기업 등록 요정을 보낼 때 사용
     private String companyNameKr;
     private String companyNameEn;
     private String ceoNameKr;
