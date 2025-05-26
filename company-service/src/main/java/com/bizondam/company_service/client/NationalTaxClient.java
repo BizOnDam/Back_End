@@ -1,6 +1,6 @@
 package com.bizondam.company_service.client;
 
-import com.bizondam.company_service.dto.CompanyValidationRequestDto;
+import com.bizondam.company_service.dto.CompanyValidationRequest;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,22 +19,17 @@ public class NationalTaxClient {
     @Value("${national-tax.api-url}")
     private String apiUrl;
 
-    @Value("${national-tax.service-key}")
+    @Value("${NATIONAL_TAX_API_KEY}")
     private String serviceKey;
 
-    // HTTP 요청 처리
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate;
 
-    // TODO 컨피그 연결하면 아래 코드로 수정
-//    private final RestTemplate restTemplate;
-
-    public boolean verify(CompanyValidationRequestDto dto) {
+    public boolean verify(CompanyValidationRequest dto) {
         // 헤더 설정
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setAccept(List.of(MediaType.APPLICATION_JSON));
         headers.set("Authorization", "Infuser " + serviceKey);
-
 
         Map<String, Object> business = Map.of(
                 "b_no", dto.getB_no(),

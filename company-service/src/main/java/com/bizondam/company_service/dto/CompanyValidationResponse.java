@@ -7,7 +7,7 @@ import java.util.List;
 
 @Getter
 @Setter
-public class CompanyValidationResponseDto {
+public class CompanyValidationResponse {
     private String status_code;
     private int request_cnt;
     private int valid_cnt;

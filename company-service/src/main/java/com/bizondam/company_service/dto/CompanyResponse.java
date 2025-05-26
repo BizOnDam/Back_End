@@ -1,13 +1,16 @@
 package com.bizondam.company_service.dto;
 
 import com.bizondam.company_service.domain.Company;
-import lombok.Getter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Getter
-public class CompanyResponseDto {   // 기업 정보 조회 및 등록 후 응답할 때 사용
-
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class CompanyResponse {   // 기업 정보 조회 및 등록 후 응답할 때 사용
     private Long companyId;
     private String companyNameKr;
     private String companyNameEn;
@@ -23,7 +26,7 @@ public class CompanyResponseDto {   // 기업 정보 조회 및 등록 후 응�
     private String businessType;
     private LocalDateTime createdAt;
 
-    public CompanyResponseDto(Company company) {
+    public CompanyResponse(Company company) {
         this.companyId = company.getCompanyId();
         this.companyNameKr = company.getCompanyNameKr();
         this.companyNameEn = company.getCompanyNameEn();
