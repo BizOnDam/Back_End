@@ -32,10 +32,10 @@ public class NationalTaxClient {
         headers.set("Authorization", "Infuser " + serviceKey);
 
         Map<String, Object> business = Map.of(
-                "b_no", dto.getB_no(),
-                "start_dt", dto.getStart_dt(),
-                "p_nm", dto.getP_nm(),
-                "b_nm", dto.getB_nm()
+            "b_no", dto.getB_no(),
+            "start_dt", dto.getStart_dt(),
+            "p_nm", dto.getP_nm(),
+            "b_nm", dto.getB_nm()
         );
 
         // 요청 본문 설정
@@ -47,19 +47,19 @@ public class NationalTaxClient {
         try {
             // API 호출
             ResponseEntity<JsonNode> response = restTemplate.exchange(
-                    apiUrl,
-                    HttpMethod.POST,
-                    request,
-                    JsonNode.class
+                apiUrl,
+                HttpMethod.POST,
+                request,
+                JsonNode.class
             );
 
             System.out.println("▶ 응답 결과: " + response.getBody());
 
             // 데이터에서 상태코드 추출 및 확인
             JsonNode validCode = response.getBody()
-                    .path("data")
-                    .get(0)
-                    .path("valid");
+                .path("data")
+                .get(0)
+                .path("valid");
 
             return "01".equals(validCode.asText());
 

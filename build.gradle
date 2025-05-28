@@ -15,7 +15,7 @@ allprojects {
     repositories {
         mavenCentral()
         gradlePluginPortal()  // 플러그인 해석을 위해
-        maven { url 'https://jitpack.io' }
+        maven { url "https://jitpack.io" }
     }
 }
 

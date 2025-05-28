@@ -1,10 +1,12 @@
 package com.bizondam.company_service.dto;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
+@Builder
 public class CompanyRequest {  // 프론트에서 기업 등록 요정을 보낼 때 사용
     private String companyNameKr;
     private String companyNameEn;

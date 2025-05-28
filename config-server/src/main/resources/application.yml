@@ -76,16 +76,11 @@ spring:
             -----END RSA PRIVATE KEY-----
         bootstrap: true
 
-  datasource:
-    url: ENC(SmiXgIHsx3grSVpGcs9brteV1yhqFY9VE/e0qBoLnpx6+j/p4GpRFYGt4xuKt9/ozmyJzZMsStviuNtrzNbVp7lKBOj6vVuQ48c0omtlJuw=)
-    username: ENC(USndIFsDL5JB0IBkf60wHzeR+E9GMwdtoHY5DTCIa1xPgBaD7+2QmSM6VHsRY2SN)
-    password: ENC(pQD8WcgIbvXbFi94aUNChOorsSfjvJBVBxj+SqfccMyh6VQsphVIsojMzxy3kaPH)
-
 # Jasypt 복호화 설정
 jasypt:
   encryptor:
-    password: ${ENCRYPTOR_PASSWORD}            # 환경변수에 복호화 키를 두세요
-    algorithm: PBEWITHHMACSHA512ANDAES_256     # 본인 서비스와 동일한 알고리즘
+    password: ${ENCRYPTOR_PASSWORD}
+    algorithm: PBEWITHHMACSHA512ANDAES_256
     iv-generator-class-name: org.jasypt.iv.RandomIvGenerator
 
 eureka:
