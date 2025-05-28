@@ -1,27 +1,30 @@
 package com.bizondam.company_service.service;
 
-import com.bizondam.company_service.domain.Company;
-import com.bizondam.company_service.dto.CompanyRequest;
 import com.bizondam.company_service.dto.CompanyResponse;
+import com.bizondam.company_service.dto.CompanyValidateResultResponse;
+import com.bizondam.company_service.entity.Company;
+import com.bizondam.company_service.dto.CompanyRequest;
 import com.bizondam.company_service.dto.CompanyValidationRequest;
-import com.bizondam.company_service.exception.BusinessException;
 import com.bizondam.company_service.mapper.CompanyMapper;
 import com.bizondam.company_service.client.NationalTaxClient;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class CompanyService {
     private final CompanyMapper companyMapper;
     private final NationalTaxClient nationalTaxClient;
 
-    //신규 회사 등록
-    public Long createCompany(CompanyRequest dto) {
+    // 국세청 검증 + DB 존재 여부 확인 메서드
+    public CompanyValidateResultResponse validateBusiness(CompanyRequest dto) {
+        CompanyValidateResultResponse response = new CompanyValidateResultResponse();
+
         // 1) 국세청 검증
         CompanyValidationRequest vDto = CompanyValidationRequest.builder()
             .b_no(dto.getBusinessNumber())
@@ -29,17 +32,30 @@ public class CompanyService {
             .p_nm(dto.getCeoNameKr())
             .b_nm(dto.getCompanyNameKr())
             .build();
-        if (!nationalTaxClient.verify(vDto)) {
-            throw new BusinessException("사업자 정보가 일치하지 않습니다.", HttpStatus.UNAUTHORIZED.value());
-        }
+
+        boolean validBusinessNumber = nationalTaxClient.verify(vDto);
 
         // 2) 이미 등록된 회사인지 체크
         Company existing = companyMapper.selectByBusinessNumber(dto.getBusinessNumber());
-        if (existing != null) {
-            return existing.getCompanyId();
-        }
+        boolean alreadyRegistered = (existing != null);
 
-        // 3) 신규 회사 Company 엔티티 생성 및 저장
+        // 3) 메시지 세팅
+        String msg;
+        if (!validBusinessNumber) {
+            msg = "사업자 정보가 일치하지 않습니다.";
+        } else if (alreadyRegistered) {
+            msg = "이미 등록된 기업입니다.";
+        } else {
+            msg = "사업자 등록번호가 유효하며, 최초 가입자입니다.";
+        }
+        response.setValidBusinessNumber(validBusinessNumber);
+        response.setAlreadyRegistered(alreadyRegistered);
+        response.setMessage(msg);
+        return response;
+    }
+
+    //신규 회사 등록
+    public CompanyResponse createCompany(CompanyRequest dto) {
         Company company = Company.builder()
             .companyNameKr(dto.getCompanyNameKr())
             .companyNameEn(dto.getCompanyNameEn())
@@ -57,17 +73,17 @@ public class CompanyService {
             .build();
         companyMapper.insertCompany(company);
 
-        return company.getCompanyId();
-    }
-
-    // 회사 단건 조회 (ID 기준)
-    public CompanyResponse getCompanyById(Long companyId) {
-        Company company = companyMapper.selectCompanyById(companyId);
-        if (company == null) {
-            throw new BusinessException("등록되지 않은 기업입니다.", HttpStatus.NOT_FOUND.value());
-        }
         return new CompanyResponse(company);
     }
+
+//    // 회사 단건 조회 (ID 기준)
+//    public CompanyResponse getCompanyById(Long companyId) {
+//        Company company = companyMapper.selectCompanyById(companyId);
+//        if (company == null) {
+//            throw new BusinessException("등록되지 않은 기업입니다.", HttpStatus.NOT_FOUND.value());
+//        }
+//        return new CompanyResponse(company);
+//    }
 
     //전체 조회
     public List<Company> getAllCompanies() {

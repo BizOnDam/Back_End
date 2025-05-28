@@ -1,6 +1,6 @@
 package com.bizondam.company_service.dto;
 
-import com.bizondam.company_service.domain.Company;
+import com.bizondam.company_service.entity.Company;
 import lombok.*;
 
 import java.time.LocalDateTime;

@@ -1,4 +1,4 @@
-package com.bizondam.company_service.domain;
+package com.bizondam.company_service.entity;
 
 import lombok.*;
 import java.time.LocalDateTime;

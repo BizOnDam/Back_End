@@ -8,8 +8,11 @@ spring:
       - "optional:configserver:http://admin:1234@localhost:8888"
 
 mybatis:
-  mapper-locations: classpath:mapper/**/*.xml
-  type-aliases-package: com.msa.company-service.domain
+  mapper-locations: classpath:mybatis.mapper/*.xml
+
+jasypt:
+  encryptor:
+    password: ${ENCRYPTOR_PASSWORD}
 
 # API 키 등록
 national-tax:
