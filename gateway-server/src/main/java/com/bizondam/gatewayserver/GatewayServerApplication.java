@@ -1,4 +1,4 @@
-package com.msa.gatewayserver;
+package com.bizondam.gatewayserver;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
