@@ -1,49 +1,17 @@
-# peer1 인스턴스 (8761)
 spring:
-  config:
-    activate:
-      on-profile: peer1
   application:
     name: eureka-server
+  # 기본으로 peer1 프로파일을 사용
+  profiles:
+    default: peer1
 
-server:
-  port: 8761
-
+# Eureka 클라이언트 공통 설정
 eureka:
-  instance:
-    prefer-ip-address: true
   client:
     register-with-eureka: true
     fetch-registry: true
-  server-url:
-    defaultZone: http://localhost:8762/eureka/
 
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info,env
----
-# peer2 인스턴스 (8762)
-spring:
-  config:
-    activate:
-      on-profile: peer2
-  application:
-    name: eureka-server
-
-server:
-  port: 8762
-
-eureka:
-  instance:
-    prefer-ip-address: true
-  client:
-    register-with-eureka: true
-    fetch-registry: true
-  server-url:
-    defaultZone: http://localhost:8761/eureka/
-
+# 관리용 엔드포인트(health, info, env)
 management:
   endpoints:
     web:
