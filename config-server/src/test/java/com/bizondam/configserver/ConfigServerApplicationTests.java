@@ -1,4 +1,4 @@
-package com.msa.configserver;
+package com.bizondam.configserver;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

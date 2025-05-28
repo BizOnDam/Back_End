@@ -1,4 +1,4 @@
-package com.msa.configserver;
+package com.bizondam.configserver;
 
 import com.ulisesbocchio.jasyptspringboot.annotation.EnableEncryptableProperties;
 import org.springframework.boot.SpringApplication;

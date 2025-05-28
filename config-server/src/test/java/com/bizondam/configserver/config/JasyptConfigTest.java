@@ -1,4 +1,4 @@
-package com.msa.configserver.config;
+package com.bizondam.configserver.config;
 
 import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
 import org.jasypt.iv.RandomIvGenerator;
