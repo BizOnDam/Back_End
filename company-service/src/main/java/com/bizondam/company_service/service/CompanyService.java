@@ -76,15 +76,6 @@ public class CompanyService {
         return new CompanyResponse(company);
     }
 
-//    // 회사 단건 조회 (ID 기준)
-//    public CompanyResponse getCompanyById(Long companyId) {
-//        Company company = companyMapper.selectCompanyById(companyId);
-//        if (company == null) {
-//            throw new BusinessException("등록되지 않은 기업입니다.", HttpStatus.NOT_FOUND.value());
-//        }
-//        return new CompanyResponse(company);
-//    }
-
     //전체 조회
     public List<Company> getAllCompanies() {
         return companyMapper.selectAllCompanies();

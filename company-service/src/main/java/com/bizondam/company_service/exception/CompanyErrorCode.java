@@ -1,12 +1,13 @@
-package com.bizondam.company_service.global.exception;
+package com.bizondam.company_service.exception;
 
+import com.bizondam.common.exception.model.BaseErrorCode;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
 @Getter
 @AllArgsConstructor
-public enum CompanyErrorCode implements ErrorCode {
+public enum CompanyErrorCode implements BaseErrorCode {
   INVALID_INPUT_VALUE("COMPANY_001", "잘못된 입력입니다.",      HttpStatus.BAD_REQUEST),
   ENTITY_NOT_FOUND    ("COMPANY_002", "회사를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
   ALREADY_EXISTS      ("COMPANY_003", "이미 등록된 회사입니다.",   HttpStatus.CONFLICT),

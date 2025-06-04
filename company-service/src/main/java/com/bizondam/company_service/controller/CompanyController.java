@@ -1,8 +1,8 @@
 package com.bizondam.company_service.controller;
 
+import com.bizondam.common.response.BaseResponse;
 import com.bizondam.company_service.client.NationalTaxClient;
 import com.bizondam.company_service.dto.*;
-import com.bizondam.company_service.global.response.BaseResponse;
 import com.bizondam.company_service.service.CompanyService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -28,14 +28,7 @@ public class CompanyController {
             .ok(BaseResponse.success("기업 등록에 성공했습니다.", response));
     }
 
-//    @Operation(summary = "회사 단일 조회 API", description = "회사 검색 시 사용하는 API")
-//    @GetMapping("/{id}")
-//    public ResponseEntity<CompanyResponse> getCompanyById(@PathVariable Long id) {
-//        CompanyResponse dto = companyService.getCompanyById(id);
-//        return ResponseEntity.ok(dto);
-//    }
-
-    @Operation(summary = "사업자 등록 번호 검증 API", description = "사업자 등록 번호 검증 밒 기업 가입 여부 확인 API")
+    @Operation(summary = "사업자 등록 번호 검증 API", description = "사업자 등록 번호 검증 및 기업 가입 여부 확인 API")
     @PostMapping("/validate")
     public ResponseEntity<CompanyValidateResultResponse> validateBusiness(@Valid @RequestBody CompanyValidationRequest dto) {
         CompanyRequest companyRequest = mapToCompanyRequest(dto);
