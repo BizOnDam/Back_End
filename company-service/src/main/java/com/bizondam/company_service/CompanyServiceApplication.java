@@ -9,7 +9,10 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 @EnableFeignClients(basePackages = "com.bizondam.company_service.client")
 @EnableEncryptableProperties
 @EnableDiscoveryClient
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = {
+		"com.bizondam.company_service",
+		"com.bizondam.common.config"
+})
 public class CompanyServiceApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(CompanyServiceApplication.class, args);
