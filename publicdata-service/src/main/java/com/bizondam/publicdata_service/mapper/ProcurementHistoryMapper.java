@@ -10,7 +10,7 @@ import java.util.List;
 public interface ProcurementHistoryMapper {
 
     // XML <insert id="insertHistory">에 매핑
-    void insertHistory(ProcurementHistory history);
+//    void insertHistory(ProcurementHistory history);
 
     // XML <select id="countBySupplierForProduct">에 매핑
     List<SupplierCount> countBySupplierForProduct(String productId);

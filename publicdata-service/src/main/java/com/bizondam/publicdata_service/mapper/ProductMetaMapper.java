@@ -9,7 +9,7 @@ import java.util.List;
 public interface ProductMetaMapper {
 
     // XML <insert id="upsert">에 매핑
-    void upsert(ProductMeta pm);
+//    void upsert(ProductMeta pm);
 
      // XML <select id="selectById">에 매핑
     ProductMeta selectById(String productId);
