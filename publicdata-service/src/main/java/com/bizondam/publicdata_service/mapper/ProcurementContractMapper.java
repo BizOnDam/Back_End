@@ -9,7 +9,7 @@ import java.util.List;
 public interface ProcurementContractMapper {
 
     // XML <insert id="upsert">에 매핑
-    void upsert(ProcurementContract c);
+//    void upsert(ProcurementContract c);
 
     // XML <select id="selectByRequestNo">에 매핑
     ProcurementContract selectByRequestNo(String requestNo);

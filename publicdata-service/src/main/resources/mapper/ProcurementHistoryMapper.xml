@@ -26,23 +26,6 @@
         <result property="createdAt"         column="created_at"/>
     </resultMap>
 
-    <insert id="insertHistory" parameterType="com.bizondam.publicdata_service.domain.ProcurementHistory" useGeneratedKeys="true" keyProperty="historyId" keyColumn="history_id">
-        INSERT INTO procurement_history
-        (contract_id, product_id, supplier_bizno, supplier_name,
-         supplier_type, unit_price, quantity, unit, total_amount,
-         increase_quantity, increase_amount, final_change_order,
-         change_order, excellent_product_yn, direct_purchase_yn,
-         mas_yn, mas_two_step_yn, unit_contract_no,
-         unit_contract_change_order, delivery_condition, created_at)
-        VALUES
-            (#{contract.contractId}, #{product.productId}, #{supplierBizno}, #{supplierName},
-             #{supplierType}, #{unitPrice}, #{quantity}, #{unit}, #{totalAmount},
-             #{increaseQuantity}, #{increaseAmount}, #{finalChangeOrder},
-             #{changeOrder}, #{excellentProductYn}, #{directPurchaseYn},
-             #{masYn}, #{masTwoStepYn}, #{unitContractNo},
-             #{unitContractChangeOrder}, #{deliveryCondition}, #{createdAt})
-    </insert>
-
     <resultMap id="SupplierCountMap" type="com.bizondam.publicdata_service.mapper.ProcurementHistoryMapper$SupplierCount">
         <result property="supplierBizno" column="supplier_bizno"/>
         <result property="supplierName" column="supplier_name"/>
