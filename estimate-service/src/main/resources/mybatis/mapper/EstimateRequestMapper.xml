@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bizondam.estimateservice.mapper.EstimateRequestMapper">
+
+  <!-- 1) estimate_request 테이블에 INSERT, status DEFAULT 2(발신) -->
+  <insert id="insertEstimateRequest"
+    parameterType="com.bizondam.estimateservice.dto.EstimateRequestCreateDto"
+    useGeneratedKeys="true" keyProperty="requestId">
+    INSERT INTO estimate_request (
+    buyer_user_id,
+    buyer_company_id,
+    supplier_company_id,
+    status,
+    detail,
+    due_date
+    )
+    VALUES (
+    #{buyerUserId},
+    #{buyerCompanyId},
+    #{supplierCompanyId},  <!-- DTO에 처음에는 null → assignSupplier 시에 업데이트 -->
+    2,                     <!-- status=2(발신) -->
+    #{detail},
+    #{dueDate}
+    )
+  </insert>
+
+  <!-- 2) estimate_request_item 테이블에 INSERT -->
+  <insert id="insertEstimateRequestItem" parameterType="map">
+    INSERT INTO estimate_request_item (
+      request_id,
+      product_id,
+      specification,
+      quantity
+    ) VALUES (
+               #{requestId},
+               #{item.prodectId},
+               #{item.specification},
+               #{item.quantity}
+             )
+  </insert>
+
+  <!-- 3) 공급 업체 지정 시 supplier_company_id를 update -->
+  <update id="updateSupplierCompany">
+    UPDATE estimate_request
+    SET supplier_company_id = #{supplierCompanyId}
+    WHERE request_id = #{requestId}
+  </update>
+
+  <!-- 4) 계약 체결 또는 미체결 시 status update -->
+  <update id="updateRequestStatus">
+    UPDATE estimate_request
+    SET status = #{status}
+    WHERE request_id = #{requestId}
+  </update>
+</mapper>
+

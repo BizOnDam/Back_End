@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bizondam.estimateservice.mapper.EstimateResponseMapper">
+
+  <!-- 1) estimate_response 헤더 INSERT status DEFAULT 1(수신) -->
+  <insert id="insertEstimateResponse" parameterType="com.bizondam.estimateservice.dto.EstimateResponseCreateDto" useGeneratedKeys="true" keyProperty="responseId">
+    INSERT INTO estimate_response (
+    request_id,
+    supplier_user_id,
+    status,
+    total_price,
+    payment_terms,
+    warranty,
+    special_terms
+    )
+    VALUES (
+    #{requestId},
+    #{supplierUserId},
+    1,              <!-- status=1(수신) -->
+    #{totalPrice},
+    #{paymentTerms},
+    #{warranty},
+    #{specialTerms}
+    )
+  </insert>
+
+  <!-- 2) estimate_response_item INSERT -->
+  <insert id="insertEstimateResponseItem" parameterType="map">
+    INSERT INTO estimate_response_item (
+      response_id,
+      item_id,
+      unit_price,
+      delivery_days
+    ) VALUES (
+               #{responseId},
+               #{item.itemId},
+               #{item.unitPrice},
+               #{item.deliveryDays}
+             )
+  </insert>
+
+  <!-- 3) 계약 체결/미체결 시 response.status update -->
+  <update id="updateResponseStatus">
+    UPDATE estimate_response
+    SET status = #{status}
+    WHERE response_id = #{responseId}
+  </update>
+</mapper>
