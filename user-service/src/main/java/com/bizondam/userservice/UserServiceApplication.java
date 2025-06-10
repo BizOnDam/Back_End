@@ -10,7 +10,10 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
     "com.bizondam.userservice",
     "com.bizondam.common.config"
 })
-@MapperScan("com.bizondam.userservice.mapper")
+@MapperScan(
+    basePackages = "com.bizondam.userservice.mapper",    // SQL 매퍼만 있는 패키지
+    annotationClass = org.apache.ibatis.annotations.Mapper.class
+)
 public class UserServiceApplication {
   public static void main(String[] args) {
     SpringApplication.run(UserServiceApplication.class, args);

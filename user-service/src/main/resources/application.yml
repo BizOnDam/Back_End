@@ -3,6 +3,10 @@ server:
   servlet:
     context-path: /user-service
 
+jasypt:
+  encryptor:
+    password: ${ENCRYPTOR_PASSWORD}
+
 spring:
   application:
     name: user-service
@@ -13,8 +17,5 @@ spring:
       - "optional:configserver:http://admin:1234@localhost:8888"
 
 mybatis:
-  mapper-locations: classpath:mybatis.mapper/*.xml
-
-jasypt:
-  encryptor:
-    password: ${ENCRYPTOR_PASSWORD}
+  mapper-locations: classpath:mybatis/mapper/*.xml
+  type-aliases-package: com.bizondam.userservice.entity
