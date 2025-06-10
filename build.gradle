@@ -65,17 +65,11 @@ subprojects {
             implementation 'org.springframework.boot:spring-boot-starter-actuator'
             implementation 'org.springframework.boot:spring-boot-starter-validation'
             implementation 'com.github.ulisesbocchio:jasypt-spring-boot-starter:3.0.4'
-            implementation "org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.4"
-            implementation 'org.springframework.boot:spring-boot-starter-jdbc'
-            testImplementation 'org.springframework.boot:spring-boot-starter-test'
             implementation "org.springframework.boot:spring-boot-starter-security"
+            testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
             compileOnly      'org.projectlombok:lombok:1.18.30'
             annotationProcessor 'org.projectlombok:lombok:1.18.30'
-
-            runtimeOnly 'com.mysql:mysql-connector-j'
-
-            implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
         }
     }
 
@@ -85,5 +79,6 @@ subprojects {
 
     tasks.withType(JavaCompile).configureEach {
         options.encoding = 'UTF-8'
+        options.annotationProcessorPath = configurations.annotationProcessor
     }
 }
