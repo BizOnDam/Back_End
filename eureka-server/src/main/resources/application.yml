@@ -1,15 +1,11 @@
 spring:
   application:
     name: eureka-server
-  # 기본으로 peer1 프로파일을 사용
   profiles:
-    default: peer1
-
-# Eureka 클라이언트 공통 설정
-eureka:
-  client:
-    register-with-eureka: true
-    fetch-registry: true
+    active: peer1
+  cloud:
+    config:
+      uri: optional:configserver:http://admin:1234@localhost:8888
 
 # 관리용 엔드포인트(health, info, env)
 management:
