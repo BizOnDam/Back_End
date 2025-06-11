@@ -1,9 +1,11 @@
 package com.bizondam.matching_service.controller;
 
+import com.bizondam.common.response.BaseResponse;
 import com.bizondam.matching_service.dto.MatchingResultDto;
 import com.bizondam.matching_service.service.MatchingService;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,8 +19,9 @@ public class RecommendationController {
     private final MatchingService matchingService;
 
     @GetMapping("/{requestId}")
-    public MatchingResultDto recommend(@PathVariable Long requestId) {
-        return matchingService.syncRecommend(requestId);
+    public ResponseEntity<BaseResponse<MatchingResultDto>> recommend(@PathVariable Long requestId) {
+        MatchingResultDto result = matchingService.syncRecommend(requestId);
+        return ResponseEntity.ok(BaseResponse.success("공급기업 추천 성공", result));
     }
 
     @Schema(description = "공급업체 정보")

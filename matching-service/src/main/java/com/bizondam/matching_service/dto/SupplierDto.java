@@ -1,6 +1,5 @@
 package com.bizondam.matching_service.dto;
 
-
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Getter;
@@ -10,8 +9,8 @@ import lombok.Setter;
 @Setter
 @Builder
 public class SupplierDto {
-    @Schema(description = "제품번호")
-    Long productId;
+    @Schema(description = "세부품명")
+    private String detailCategoryName;
 
     @Schema(description = "공급자 사업자번호")
     private String supplierBizno;
