@@ -6,25 +6,23 @@
 <mapper namespace="com.bizondam.estimateservice.mapper.EstimateRequestMapper">
 
   <!-- 1) estimate_request 테이블에 INSERT, status DEFAULT 2(발신) -->
-  <insert id="insertEstimateRequest"
-    parameterType="com.bizondam.estimateservice.dto.EstimateRequestCreateDto"
-    useGeneratedKeys="true" keyProperty="requestId">
+  <insert id="insertEstimateRequest" parameterType="EstimateRequestCreateDto"
+    useGeneratedKeys="true" keyProperty="requestId" keyColumn="request_id">
     INSERT INTO estimate_request (
-    buyer_user_id,
-    buyer_company_id,
-    supplier_company_id,
-    status,
-    detail,
-    due_date
-    )
-    VALUES (
-    #{buyerUserId},
-    #{buyerCompanyId},
-    #{supplierCompanyId},  <!-- DTO에 처음에는 null → assignSupplier 시에 업데이트 -->
-    2,                     <!-- status=2(발신) -->
-    #{detail},
-    #{dueDate}
-    )
+      buyer_user_id,
+      buyer_company_id,
+      supplier_company_id,
+      status,
+      detail,
+      due_date
+    ) VALUES (
+               #{buyerUserId},
+               #{buyerCompanyId},
+               #{supplierCompanyId},
+               2,
+               #{detail},
+               #{dueDate}
+             )
   </insert>
 
   <!-- 2) estimate_request_item 테이블에 INSERT -->
@@ -36,7 +34,7 @@
       quantity
     ) VALUES (
                #{requestId},
-               #{item.prodectId},
+               #{item.productId},
                #{item.specification},
                #{item.quantity}
              )
@@ -49,11 +47,10 @@
     WHERE request_id = #{requestId}
   </update>
 
-  <!-- 4) 계약 체결 또는 미체결 시 status update -->
+  <!-- 4) 계약 체결/미체결 시 status update -->
   <update id="updateRequestStatus">
     UPDATE estimate_request
     SET status = #{status}
     WHERE request_id = #{requestId}
   </update>
 </mapper>
-

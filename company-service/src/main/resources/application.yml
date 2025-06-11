@@ -3,6 +3,10 @@ server:
   servlet:
     context-path: /company-service
 
+jasypt:
+  encryptor:
+    password: ${ENCRYPTOR_PASSWORD}
+
 spring:
   application:
     name: company-service
@@ -14,10 +18,6 @@ spring:
 
 mybatis:
   mapper-locations: classpath:mybatis.mapper/*.xml
-
-jasypt:
-  encryptor:
-    password: ${ENCRYPTOR_PASSWORD}
 
 # API 키 등록
 national-tax:

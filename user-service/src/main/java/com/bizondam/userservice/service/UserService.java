@@ -6,7 +6,6 @@ import com.bizondam.userservice.dto.request.SignUpRequest;
 import com.bizondam.userservice.dto.response.SignUpResponse;
 import com.bizondam.userservice.entity.RoleInCompany;
 import com.bizondam.userservice.entity.User;
-import com.bizondam.userservice.mapper.SignUpMapper;
 import com.bizondam.userservice.mapper.UserMapper;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
   private final PasswordEncoder passwordEncoder;
   private final UserMapper userMapper;
-  private final SignUpMapper signUpMapper;
 
   public SignUpResponse registerUser(SignUpRequest signupRequest) {
     // 1) 기존 회원 중복 검사
@@ -56,8 +54,8 @@ public class UserService {
     // 5) DB 저장
     userMapper.insertUser(user);
 
-    // 6) DTO 변환 (MapStruct)
-    SignUpResponse response = signUpMapper.toDto(user);
+    // 6) DTO 변환
+    SignUpResponse response = convertToSignUpResponse(user);
 
     // 7) 로깅
     log.debug("Registered new user [id={}]", user.getUserId());
@@ -65,5 +63,19 @@ public class UserService {
 
     // 8) 변환된 DTO 반환
     return response;
+  }
+
+  private SignUpResponse convertToSignUpResponse(User user) {
+    return SignUpResponse.builder()
+        .userId(user.getUserId())
+        .email(user.getEmail())
+        .loginId(user.getLoginId())
+        .nameKr(user.getNameKr())
+        .nameEn(user.getNameEn())
+        .department(user.getDepartment())
+        .position(user.getPosition())
+        .roleInCompany(user.getRoleInCompany())
+        .createdAt(user.getCreatedAt())
+        .build();
   }
 }

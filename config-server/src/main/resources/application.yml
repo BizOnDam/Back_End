@@ -16,7 +16,6 @@ spring:
       server:
         git:
           uri: git@github.com:BizOnDam/Config.git
-          searchPaths: config
 
           # 로컬 SSH 설정 무시
           ignoreLocalSshSettings: true
