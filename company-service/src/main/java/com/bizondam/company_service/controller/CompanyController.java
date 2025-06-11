@@ -38,7 +38,7 @@ public class CompanyController {
 
     private CompanyRequest mapToCompanyRequest(CompanyValidationRequest validationRequest) {
         if (validationRequest == null) {
-            return null;
+            throw new IllegalArgumentException("요청 데이터가 null입니다.");
         }
         return CompanyRequest.builder()
             .businessNumber(validationRequest.getB_no())
