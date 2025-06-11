@@ -1,41 +1,23 @@
-#server:
-#  port: 8085
-#  servlet:
-#    context-path: /matching-service
-
-spring:
-  application:
-    name: matching-service
-#    profiles:
-#      active: dev
-#    config:
-#      import:
-#        - "optional:configserver:http://admin:1234@localhost:8888"
-
-  datasource:
-#    url: jdbc:mysql://localhost:3306/bizondam
-#    username: ${LOCAL_DB_USERNAME}
-#    password: ${LOCAL_DB_PASSWORD}
-    url: jdbc:mysql://14.63.178.155:3306/bizondam
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
-    driver-class-name: com.mysql.cj.jdbc.Driver
-
-# 유레카 끄기
-eureka:
-  client:
-    register-with-eureka: false
-    fetch-registry: false
-
-mybatis:
-  mapper-locations: classpath:mybatis/mapper/*.xml
-  configuration:
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl # log check
-    map-underscore-to-camel-case: true
+server:
+  port: 8084
+  servlet:
+    context-path: /matching-service
 
 jasypt:
   encryptor:
     password: ${ENCRYPTOR_PASSWORD}
+
+spring:
+  application:
+    name: matching-service
+  profiles:
+    active: dev
+  config:
+    import:
+      - "optional:configserver:http://admin:1234@localhost:8888"
+
+mybatis:
+  mapper-locations: classpath:mybatis/mapper/*.xml
 
 openai:
   api-key: ${OPENAI_API_KEY}
