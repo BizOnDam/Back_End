@@ -6,8 +6,7 @@
 <mapper namespace="com.bizondam.company_service.mapper.CompanyMapper">
 
   <!-- 사업자번호 기준 조회 -->
-  <select id="selectByBusinessNumber" parameterType="string"
-    resultType="com.bizondam.company_service.entity.Company">
+  <select id="selectByBusinessNumber" parameterType="string" resultMap="CompanyResultMap">
     SELECT * FROM companies WHERE business_number = #{businessNumber}
   </select>
 
@@ -33,25 +32,30 @@
        #{businessType}, NOW())
   </insert>
 
-  <!-- company_id 기준 단건 조회 -->
-  <select id="selectCompanyById"
-    parameterType="long"
-    resultType="com.bizondam.company_service.entity.Company">
-    SELECT *
-    FROM companies
-    WHERE company_id = #{companyId}
-  </select>
+  <resultMap id="CompanyResultMap" type="com.bizondam.company_service.entity.Company">
+    <id property="companyId" column="company_id" />
+    <result property="companyNameKr" column="company_name_kr" />
+    <result property="companyNameEn" column="company_name_en" />
+    <result property="ceoNameKr" column="ceo_name_kr" />
+    <result property="ceoNameEn" column="ceo_name_en" />
+    <result property="startDate" column="start_date" />
+    <result property="businessNumber" column="business_number" />
+    <result property="phoneNumber" column="phone_number" />
+    <result property="faxNumber" column="fax_number" />
+    <result property="postcode" column="postcode" />
+    <result property="address" column="address" />
+    <result property="addressDetail" column="address_detail" />
+    <result property="businessType" column="business_type" />
+    <result property="createdAt" column="created_at" />
+  </resultMap>
 
   <!-- 전체 조회 -->
-  <select id="selectAllCompanies"
-    resultType="com.bizondam.company_service.entity.Company">
-    SELECT *
-    FROM companies
+  <select id="selectAllCompanies" resultMap="CompanyResultMap">
+    SELECT * FROM companies
   </select>
 
   <!-- 수정 -->
-  <update id="updateCompany"
-    parameterType="com.bizondam.company_service.entity.Company">
+  <update id="updateCompany" parameterType="com.bizondam.company_service.entity.Company">
     UPDATE companies
     SET company_name_kr  = #{companyNameKr},
         company_name_en  = #{companyNameEn},
@@ -69,10 +73,8 @@
   </update>
 
   <!-- 삭제 -->
-  <delete id="deleteCompany"
-    parameterType="long">
-    DELETE
-    FROM companies
+  <delete id="deleteCompany" parameterType="long">
+    DELETE FROM companies
     WHERE company_id = #{companyId}
   </delete>
 

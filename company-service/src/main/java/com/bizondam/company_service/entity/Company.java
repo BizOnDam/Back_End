@@ -5,9 +5,9 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class Company {
     private Long companyId; //기본키, 자동 증가
     //회사 정보

@@ -38,16 +38,22 @@ public class CompanyService {
         // 2) 이미 등록된 회사인지 체크
         Company existing = companyMapper.selectByBusinessNumber(dto.getBusinessNumber());
         boolean alreadyRegistered = (existing != null);
+        System.out.println("existing: " + existing);
+        System.out.println("companyId: " + existing.getCompanyId());
 
         // 3) 메시지 세팅
         String msg;
         if (!validBusinessNumber) {
             msg = "사업자 정보가 일치하지 않습니다.";
+            response.setCompanyId(null);
         } else if (alreadyRegistered) {
             msg = "이미 등록된 기업입니다.";
+            response.setCompanyId(existing.getCompanyId());
         } else {
             msg = "사업자 등록번호가 유효하며, 최초 가입자입니다.";
+            response.setCompanyId(null);
         }
+
         response.setValidBusinessNumber(validBusinessNumber);
         response.setAlreadyRegistered(alreadyRegistered);
         response.setMessage(msg);

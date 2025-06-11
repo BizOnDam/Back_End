@@ -17,7 +17,8 @@ spring:
       - "optional:configserver:http://admin:1234@localhost:8888"
 
 mybatis:
-  mapper-locations: classpath:mybatis.mapper/*.xml
+  mapper-locations: classpath:mybatis/mapper/*.xml
+  type-aliases-package: com.bizondam.company_service.entity
 
 # API 키 등록
 national-tax:
