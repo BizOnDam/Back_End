@@ -10,7 +10,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SupplierMetricDto {
-    private Long productId;          // estimate_request_item.product_id
+    private String detailCategoryName; // pmb.detail_category_name
     private String supplierBizno;    // ph.supplier_bizno
     private String supplierName;     // ph.supplier_name
     private Integer matchedQuantity; // MAX(ph.quantity)

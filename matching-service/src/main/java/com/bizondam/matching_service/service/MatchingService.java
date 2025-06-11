@@ -44,7 +44,7 @@ public class MatchingService {
 
         List<SupplierDto> commonSuppliers = metrics.stream()
                 .map(m -> SupplierDto.builder()
-                        .productId(m.getProductId())
+                        .detailCategoryName(m.getDetailCategoryName())
                         .supplierBizno(m.getSupplierBizno())
                         .supplierName(m.getSupplierName())
                         .matchedQuantity(m.getMatchedQuantity())
