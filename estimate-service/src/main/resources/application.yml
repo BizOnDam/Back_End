@@ -3,24 +3,19 @@ server:
   servlet:
     context-path: /estimate-service
 
+jasypt:
+  encryptor:
+    password: ${ENCRYPTOR_PASSWORD}
+
 spring:
   application:
     name: estimate-service
   profiles:
     active: dev
-  datasource:
-    url: jdbc:mysql://14.63.178.155:3306/bizondam?useSSL=false&serverTimezone=Asia/Seoul
-    username: root
-    password: ENC(3D50pJI06v/K6NSf6XxYIqQU8JOcmzuiGmHnPxuWf2J3R/L1MNolwrdh78N7qBHz)
-    driver-class-name: com.mysql.cj.jdbc.Driver
   config:
     import:
       - "optional:configserver:http://admin:1234@localhost:8888"
 
 mybatis:
-  mapper-locations: classpath:/mapper/xml/*.xml
+  mapper-locations: classpath*:mybatis/mapper/*.xml
   type-aliases-package: com.bizondam.estimateservice.dto
-
-jasypt:
-  encryptor:
-    password: ${ENCRYPTOR_PASSWORD}

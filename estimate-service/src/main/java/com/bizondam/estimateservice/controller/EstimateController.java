@@ -47,17 +47,17 @@ public class EstimateController {
 
   @Operation(summary = "계약 체결", description = "양쪽 모두 계약을 수락한 경우")
   @PatchMapping("/{requestId}/accept")
-  public ResponseEntity<Void> acceptContract(@PathVariable Long requestId,
+  public ResponseEntity<BaseResponse<Boolean>> acceptContract(@PathVariable Long requestId,
       @AuthenticationPrincipal CustomUserDetails user) {
-    estimateService.acceptContract(requestId, user.getUserId());
-    return ResponseEntity.ok().build();
+    estimateService.acceptContract(requestId);
+    return ResponseEntity.ok(BaseResponse.success(requestId + " 계약 체결 성공", true));
   }
 
   @Operation(summary = "계약 미체결", description = "어느 한 쪽에서 계약을 거절한 경우.")
   @PatchMapping("/{requestId}/reject")
-  public ResponseEntity<Void> rejectContract(@PathVariable Long requestId,
+  public ResponseEntity<BaseResponse<Boolean>> rejectContract(@PathVariable Long requestId,
       @AuthenticationPrincipal CustomUserDetails user) {
-    estimateService.rejectContract(requestId, user.getUserId());
-    return ResponseEntity.ok().build();
+    estimateService.rejectContract(requestId);
+    return ResponseEntity.ok(BaseResponse.success(requestId + " 계약 미체결", false));
   }
 }

@@ -6,7 +6,8 @@
 <mapper namespace="com.bizondam.estimateservice.mapper.EstimateResponseMapper">
 
   <!-- 1) estimate_response 헤더 INSERT status DEFAULT 1(수신) -->
-  <insert id="insertEstimateResponse" parameterType="com.bizondam.estimateservice.dto.EstimateResponseCreateDto" useGeneratedKeys="true" keyProperty="responseId">
+  <insert id="insertEstimateResponse" parameterType="EstimateResponseCreateDto"
+    useGeneratedKeys="true" keyProperty="responseId" keyColumn="response_id">
     INSERT INTO estimate_response (
     request_id,
     supplier_user_id,
