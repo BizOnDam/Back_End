@@ -34,7 +34,7 @@ public class SecurityConfig {
             // 그 외 API 엔드포인트 (당장은 모두 허용, 나중에 authenticated() 로 변경)
             .requestMatchers("/api/**").permitAll()
             // 그 외 나머지는 인증 처리 (필요시)
-            .anyRequest().authenticated()
+            .anyRequest().permitAll()
         );
     return http.build();
   }
