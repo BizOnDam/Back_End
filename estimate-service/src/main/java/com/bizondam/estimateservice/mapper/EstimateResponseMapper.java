@@ -15,4 +15,6 @@ public interface EstimateResponseMapper {
   // 3) 계약 체결/미체결 시, estimate_response.status UPDATE
   void updateResponseStatus(@Param("responseId") Long responseId,
       @Param("status") Integer status);
+  // 4) requestId로 responseId 검색
+  Long findResponseIdByRequestId(@Param("requestId") Long requestId);
 }
