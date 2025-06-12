@@ -22,4 +22,5 @@ public class User {
   private Boolean isVerified;
   private String authProvider;  // PASS or EMAIL
   private LocalDateTime createdAt;
+  private LocalDateTime updatedAt;
 }
