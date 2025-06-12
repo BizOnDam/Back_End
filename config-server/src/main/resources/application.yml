@@ -73,7 +73,6 @@ spring:
             zi5djL70bdsiH9LH/qvZHSgjefPRiypBUb9vQJO9ZTRBVrJPSJBSXAMVIQdhvk7R
             MMrZu5MRPTD2ovr2ZQnegx3mC1JvUc+vN/N/Td+FA64Utjc6OMtqp7i7qM0=
             -----END RSA PRIVATE KEY-----
-        bootstrap: true
 
 # Jasypt 복호화 설정
 jasypt:
@@ -86,8 +85,8 @@ eureka:
   client:
     register-with-eureka: true
     fetch-registry: true
-    service-url:
-      defaultZone: http://eureka1:8761/eureka/,http://eureka2:8762/eureka/
+    serviceUrl:
+      defaultZone: http://eureka:eurekapwd@localhost:8761/eureka/,http://eureka:eurekapwd@localhost:8762/eureka/
 
 management:
   endpoints:
