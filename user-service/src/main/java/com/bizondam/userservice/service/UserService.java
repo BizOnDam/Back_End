@@ -47,7 +47,7 @@ public class UserService {
     user.setRoleDesc(signupRequest.getRoleDesc());
     user.setPhoneNumber(signupRequest.getPhoneNumber());
     user.setRoleInCompany(role);
-    user.setIsVerified(false);
+    user.setIsVerified(signupRequest.getIsVerified());
     user.setAuthProvider(signupRequest.getAuthProvider());
     user.setCreatedAt(LocalDateTime.now());
 
@@ -68,14 +68,19 @@ public class UserService {
   private SignUpResponse convertToSignUpResponse(User user) {
     return SignUpResponse.builder()
         .userId(user.getUserId())
+        .companyId(user.getCompanyId())
         .email(user.getEmail())
         .loginId(user.getLoginId())
         .nameKr(user.getNameKr())
         .nameEn(user.getNameEn())
         .department(user.getDepartment())
         .position(user.getPosition())
+        .roleDesc(user.getRoleDesc())
+        .phoneNumber(user.getPhoneNumber())
         .roleInCompany(user.getRoleInCompany())
+        .isVerified(user.getIsVerified())
         .createdAt(user.getCreatedAt())
         .build();
   }
+
 }

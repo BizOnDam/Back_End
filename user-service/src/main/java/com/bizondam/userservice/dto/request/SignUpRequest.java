@@ -2,6 +2,7 @@ package com.bizondam.userservice.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -44,6 +45,9 @@ public class SignUpRequest {
   @NotBlank(message = "사용자 연락처 항목은 필수입니다.") @Size(max = 15)
   private String phoneNumber;
 
-  @NotNull
+  @NotNull(message = "인증 수단은 필수입니다.")
   private String authProvider; // PASS or EMAIL
+
+  @NotNull(message = "인증 여부는 필수입니다.")
+  private Boolean isVerified;
 }
