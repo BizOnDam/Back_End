@@ -2,8 +2,6 @@ spring:
   config:
     activate:
       on-profile: peer2
-  application:
-    name: eureka-server
 
 server:
   port: 8762
@@ -15,4 +13,4 @@ eureka:
     register-with-eureka: true
     fetch-registry: true
     service-url:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: http://eureka:eurekapwd@localhost:8761/eureka/

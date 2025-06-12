@@ -13,9 +13,7 @@ spring:
   profiles:
     active: dev
   config:
-    import:
-      - "optional:configserver:http://admin:1234@localhost:8888"
-
+    import: optional:configserver:http://admin:1234@localhost:8888
 mybatis:
   mapper-locations: classpath:mybatis/mapper/*.xml
   type-aliases-package: com.bizondam.company_service.entity

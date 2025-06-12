@@ -2,6 +2,7 @@ package com.bizondam.estimateservice.mapper;
 
 import com.bizondam.estimateservice.dto.EstimateRequestCreateDto;
 import com.bizondam.estimateservice.dto.EstimateRequestItemDto;
+import com.bizondam.estimateservice.model.EstimateRequestItem;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -18,4 +19,6 @@ public interface EstimateRequestMapper {
   // 4) 계약 체결/미체결 시, estimate_request.status를 UPDATE
   void updateRequestStatus(@Param("requestId") Long requestId,
       @Param("status") Integer status);
+  // 5) itemId 반환
+  void insertEstimateRequestItemWithReturnId(EstimateRequestItem item);
 }

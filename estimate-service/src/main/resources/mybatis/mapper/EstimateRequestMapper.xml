@@ -4,53 +4,45 @@
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.bizondam.estimateservice.mapper.EstimateRequestMapper">
-
-  <!-- 1) estimate_request 테이블에 INSERT, status DEFAULT 2(발신) -->
+  <!-- 1. 견적 요청서 생성 -->
   <insert id="insertEstimateRequest" parameterType="EstimateRequestCreateDto"
     useGeneratedKeys="true" keyProperty="requestId" keyColumn="request_id">
     INSERT INTO estimate_request (
-      buyer_user_id,
-      buyer_company_id,
-      supplier_company_id,
-      status,
-      detail,
-      due_date
+      buyer_user_id, buyer_company_id, status, detail, due_date
     ) VALUES (
-               #{buyerUserId},
-               #{buyerCompanyId},
-               #{supplierCompanyId},
-               2,
-               #{detail},
-               #{dueDate}
+               #{buyerUserId}, #{buyerCompanyId}, 2, #{detail}, #{dueDate}
              )
   </insert>
 
-  <!-- 2) estimate_request_item 테이블에 INSERT -->
+  <!-- 2. 견적 요청 품목 생성 -->
   <insert id="insertEstimateRequestItem" parameterType="map">
     INSERT INTO estimate_request_item (
-      request_id,
-      product_id,
-      specification,
-      quantity
+      request_id, product_id, specification, quantity
     ) VALUES (
-               #{requestId},
-               #{item.productId},
-               #{item.specification},
-               #{item.quantity}
+               #{requestId}, #{item.productId}, #{item.specification}, #{item.quantity}
              )
   </insert>
 
-  <!-- 3) 공급 업체 지정 시 supplier_company_id를 update -->
+  <!-- 3. 공급 업체 지정 (PATCH) -->
   <update id="updateSupplierCompany">
     UPDATE estimate_request
     SET supplier_company_id = #{supplierCompanyId}
     WHERE request_id = #{requestId}
   </update>
 
-  <!-- 4) 계약 체결/미체결 시 status update -->
+  <!-- 4. 견적 요청서 status 변경 (계약 체결/미체결) -->
   <update id="updateRequestStatus">
     UPDATE estimate_request
     SET status = #{status}
     WHERE request_id = #{requestId}
   </update>
+
+  <!-- 5. 아이템 id 반환 -->
+  <insert id="insertEstimateRequestItemWithReturnId"
+    parameterType="com.bizondam.estimateservice.model.EstimateRequestItem"
+    useGeneratedKeys="true" keyProperty="itemId" keyColumn="item_id">
+    INSERT INTO estimate_request_item (request_id, product_id, specification, quantity)
+    VALUES (#{requestId}, #{productId}, #{specification}, #{quantity})
+  </insert>
+
 </mapper>

@@ -1,11 +1,15 @@
 spring:
   application:
-    name: eureka-server
+    name: /eureka-server
   profiles:
     active: peer1
   cloud:
     config:
       uri: optional:configserver:http://admin:1234@localhost:8888
+  security:
+    user:
+      name: eureka
+      password: eurekapwd
 
 # 관리용 엔드포인트(health, info, env)
 management:
