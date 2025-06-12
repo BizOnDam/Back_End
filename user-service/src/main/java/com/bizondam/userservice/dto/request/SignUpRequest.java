@@ -2,7 +2,6 @@ package com.bizondam.userservice.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
-import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -50,4 +49,6 @@ public class SignUpRequest {
 
   @NotNull(message = "인증 여부는 필수입니다.")
   private Boolean isVerified;
+
+  private String code;
 }

@@ -47,8 +47,8 @@ public class UserService {
     user.setRoleDesc(signupRequest.getRoleDesc());
     user.setPhoneNumber(signupRequest.getPhoneNumber());
     user.setRoleInCompany(role);
-    user.setIsVerified(signupRequest.getIsVerified());
-    user.setAuthProvider(signupRequest.getAuthProvider());
+    user.setAuthProvider("EMAIL");
+    user.setIsVerified(true); // 이메일 인증 검증이 끝났으므로 true
     user.setCreatedAt(LocalDateTime.now());
 
     // 5) DB 저장
