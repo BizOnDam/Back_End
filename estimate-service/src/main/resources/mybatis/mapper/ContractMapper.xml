@@ -50,7 +50,7 @@
 
 
   <!-- ResultMap 정의 -->
-  <resultMap id="ContractResultMap" type="com.bizondam.estimateservice.dto.ContractDto">
+  <resultMap id="ContractResultMap" type="ContractDto">
     <id property="requestId" column="request_id"/>
     <result property="buyerUserId" column="buyer_user_id"/>
     <result property="buyerCompanyId" column="buyer_company_id"/>
@@ -70,7 +70,7 @@
     <!-- items는 서비스에서 별도 조회 후 set -->
   </resultMap>
 
-  <resultMap id="ContractItemResultMap" type="com.bizondam.estimateservice.dto.ContractItemDto">
+  <resultMap id="ContractItemResultMap" type="ContractItemDto">
     <id property="itemId" column="item_id"/>
     <result property="requestId" column="request_id"/>
     <result property="productId" column="product_id"/>

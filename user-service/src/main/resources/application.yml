@@ -14,7 +14,23 @@ spring:
     active: dev
   config:
     import: optional:configserver:http://admin:1234@localhost:8888
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: hanium2024@gmail.com
+    password: qtes eall poey evui
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
 
 mybatis:
   mapper-locations: classpath:mybatis/mapper/*.xml
   type-aliases-package: com.bizondam.userservice.entity
+  configuration:
+    map-underscore-to-camel-case: true

@@ -12,5 +12,5 @@ eureka:
   client:
     register-with-eureka: true
     fetch-registry: true
-    service-url:
+    serviceUrl:
       defaultZone: http://eureka:eurekapwd@localhost:8761/eureka/

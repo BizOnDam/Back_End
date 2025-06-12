@@ -12,7 +12,7 @@
 
   <!-- insert 후 생성된 PK를 companyId 필드에 설정 -->
   <insert id="insertCompany"
-    parameterType="com.bizondam.company_service.entity.Company"
+    parameterType="Company"
     useGeneratedKeys="true"
     keyProperty="companyId"
     keyColumn="company_id">
@@ -32,7 +32,7 @@
        #{businessType}, NOW())
   </insert>
 
-  <resultMap id="CompanyResultMap" type="com.bizondam.company_service.entity.Company">
+  <resultMap id="CompanyResultMap" type="Company">
     <id property="companyId" column="company_id" />
     <result property="companyNameKr" column="company_name_kr" />
     <result property="companyNameEn" column="company_name_en" />
@@ -55,7 +55,7 @@
   </select>
 
   <!-- 수정 -->
-  <update id="updateCompany" parameterType="com.bizondam.company_service.entity.Company">
+  <update id="updateCompany" parameterType="Company">
     UPDATE companies
     SET company_name_kr  = #{companyNameKr},
         company_name_en  = #{companyNameEn},
