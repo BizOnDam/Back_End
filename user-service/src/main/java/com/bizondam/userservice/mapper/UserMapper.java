@@ -11,5 +11,5 @@ public interface UserMapper {
   //신규 사용자 등록
   int insertUser(User user);
   //기존 사용자 조회
-  boolean existsByLoginId(@Param("loginId") String loginId);
+  int countByLoginId(@Param("loginId") String loginId);
 }

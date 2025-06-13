@@ -1,7 +1,5 @@
 package com.bizondam.userservice.service;
 
-import com.bizondam.common.exception.CustomException;
-import com.bizondam.userservice.exception.UserErrorCode;
 import com.bizondam.userservice.dto.request.SignUpRequest;
 import com.bizondam.userservice.dto.response.SignUpResponse;
 import com.bizondam.userservice.entity.RoleInCompany;
@@ -23,18 +21,14 @@ public class UserService {
   private final UserMapper userMapper;
 
   public SignUpResponse registerUser(SignUpRequest signupRequest) {
-    // 1) 기존 회원 중복 검사
-    if (userMapper.existsByLoginId(signupRequest.getLoginId())) {
-      throw new CustomException(UserErrorCode.USERNAME_ALREADY_EXIST);
-    }
-    // 2) 비밀번호 암호화
+    // 1) 비밀번호 암호화
     String encodedPwd = passwordEncoder.encode(signupRequest.getLoginPwd());
 
-    // 3) 회사 내 기존 유저 수로 역할 결정
+    // 2) 회사 내 기존 유저 수로 역할 결정
     int count = userMapper.countByCompanyId(signupRequest.getCompanyId());
     RoleInCompany role = (count == 0) ? RoleInCompany.CEO : RoleInCompany.STAFF;
 
-    // 4) 엔티티에 값 세팅
+    // 3) 엔티티에 값 세팅
     User user = new User();
     user.setCompanyId(signupRequest.getCompanyId());
     user.setEmail(signupRequest.getEmail());
@@ -51,17 +45,17 @@ public class UserService {
     user.setIsVerified(true); // 이메일 인증 검증이 끝났으므로 true
     user.setCreatedAt(LocalDateTime.now());
 
-    // 5) DB 저장
+    // 4) DB 저장
     userMapper.insertUser(user);
 
-    // 6) DTO 변환
+    // 5) DTO 변환
     SignUpResponse response = convertToSignUpResponse(user);
 
-    // 7) 로깅
+    // 6) 로깅
     log.debug("Registered new user [id={}]", user.getUserId());
     log.info("New user registered - id: {}, role: {}", user.getUserId(), user.getRoleInCompany());
 
-    // 8) 변환된 DTO 반환
+    // 7) 변환된 DTO 반환
     return response;
   }
 
@@ -83,4 +77,9 @@ public class UserService {
         .build();
   }
 
+  // 아이디 중복 검사
+  public boolean isLoginIdDuplicate(String loginId) {
+    int count = userMapper.countByLoginId(loginId);
+    return count > 0;
+  }
 }
