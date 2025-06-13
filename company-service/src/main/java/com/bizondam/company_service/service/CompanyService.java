@@ -39,7 +39,9 @@ public class CompanyService {
         Company existing = companyMapper.selectByBusinessNumber(dto.getBusinessNumber());
         boolean alreadyRegistered = (existing != null);
         System.out.println("existing: " + existing);
-        System.out.println("companyId: " + existing.getCompanyId());
+        if (existing != null) {
+            System.out.println("companyId: " + existing.getCompanyId());
+        }
 
         // 3) 메시지 세팅
         String msg;
