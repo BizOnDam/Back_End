@@ -13,4 +13,7 @@ dependencies {
 	implementation 'com.fasterxml.jackson.core:jackson-databind'
 	implementation 'org.springframework.cloud:spring-cloud-starter-config'
 	implementation project(':common')														// 공통 모듈
+
+	//swagger 그룹 설정
+	implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.8.1'
 }
