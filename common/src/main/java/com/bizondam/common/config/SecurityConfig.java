@@ -3,17 +3,14 @@ package com.bizondam.common.config;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
-@EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
@@ -29,10 +26,13 @@ public class SecurityConfig {
             .requestMatchers(
                 "/swagger-ui.html",
                 "/swagger-ui/**",
-                "/v3/api-docs/**"
+                "/v3/api-docs/**",
+                "/swagger-resources/**",
+                "/webjars/**",
+                "/favicon.ico"
             ).permitAll()
             // 그 외 API 엔드포인트 (당장은 모두 허용, 나중에 authenticated() 로 변경)
-            .requestMatchers("/api/**").permitAll()
+            .requestMatchers(HttpMethod.OPTIONS,"/api/**").permitAll()
             // 그 외 나머지는 인증 처리 (필요시)
             .anyRequest().permitAll()
         );
@@ -43,12 +43,5 @@ public class SecurityConfig {
   @Bean
   public PasswordEncoder passwordEncoder() {
     return new BCryptPasswordEncoder();
-  }
-
-  // 인증 관리자 Bean 등록
-  @Bean
-  public AuthenticationManager authenticationManager(
-      AuthenticationConfiguration authenticationConfiguration) throws Exception {
-    return authenticationConfiguration.getAuthenticationManager();
   }
 }
