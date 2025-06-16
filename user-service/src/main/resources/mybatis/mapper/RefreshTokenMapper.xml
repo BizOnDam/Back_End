@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bizondam.userservice.mapper.RefreshTokenMapper">
+
+  <insert id="insertOrUpdateRefreshToken">
+    INSERT INTO refresh_tokens (user_id, token_id, refresh_token, expires_at)
+    VALUES (#{userId}, #{tokenId}, #{refreshToken}, #{expiresAt})
+      ON DUPLICATE KEY UPDATE
+                         refresh_token = #{refreshToken},
+                         expires_at = #{expiresAt}
+  </insert>
+
+  <select id="findRefreshTokenByUserIdAndTokenId" resultType="string">
+    SELECT refresh_token
+    FROM refresh_tokens
+    WHERE user_id = #{userId}
+      AND token_id = #{tokenId}
+  </select>
+
+  <delete id="deleteRefreshToken">
+    DELETE FROM refresh_tokens
+    WHERE user_id = #{userId}
+      AND token_id = #{tokenId}
+  </delete>
+
+</mapper>

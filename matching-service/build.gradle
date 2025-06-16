@@ -1,19 +1,17 @@
 dependencies {
-	implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.4'				// MyBatis + DB
-	implementation 'org.springframework.boot:spring-boot-starter-jdbc'
-	runtimeOnly 'com.mysql:mysql-connector-j'
-	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'	// 클라우드 서비스
-	implementation 'org.springdoc:springdoc-openapi-starter-webflux-ui:2.8.1'				// Swagger
-	implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.18.3"			// XML 파싱
-	developmentOnly 'org.springframework.boot:spring-boot-devtools'							// 개발 편의성
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
-	implementation 'io.projectreactor.netty:reactor-netty'
+	implementation 'org.springdoc:springdoc-openapi-starter-webflux-ui:2.8.1'
+	implementation 'org.springframework.cloud:spring-cloud-starter-config'
+	implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.18.3"		// XML 파싱
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'						// 개발 편의성
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	implementation 'io.projectreactor:reactor-core'
 	implementation 'com.fasterxml.jackson.core:jackson-databind'
-	implementation 'org.springframework.cloud:spring-cloud-starter-config'
-	implementation project(':common')														// 공통 모듈
+	implementation project(':common')
 
-	//swagger 그룹 설정
-	implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.8.1'
+	//DB
+	implementation "org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.4"
+	implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+	runtimeOnly 'com.mysql:mysql-connector-j'
 }

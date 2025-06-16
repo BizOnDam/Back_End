@@ -32,3 +32,10 @@ mybatis:
   type-aliases-package: com.bizondam.userservice.entity
   configuration:
     map-underscore-to-camel-case: true
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+  override-with-generic-response: false

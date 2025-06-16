@@ -27,6 +27,15 @@ public class CorsConfig {
     configuration.setAllowCredentials(true);
     // 클라이언트가 Authorization 헤더를 읽을 수 있도록 허용(JWT를 사용할 경우)
     configuration.setExposedHeaders(List.of("Authorization"));
+    // gateway 요청 허용
+    configuration.setAllowedOrigins(Arrays.asList(
+        "http://localhost:8080",
+        "http://14.63.178.155:8080",
+        "http://14.63.178.155:8081",
+        "http://14.63.178.155:8082",
+        "http://14.63.178.155:8083",
+        "http://14.63.178.155:8084"
+    ));
     // 모든 경로에 대해 위의 CORS 설정을 적용
     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
     source.registerCorsConfiguration("/**", configuration);

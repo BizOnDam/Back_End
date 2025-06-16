@@ -4,9 +4,15 @@ server:
 spring:
   application:
     name: gateway-server
+  profiles:
+    active: dev
+  config:
+    import: optional:configserver:http://admin:1234@localhost:8888
 
   cloud:
     gateway:
+      default-filters:
+        - JwtAuthenticationFilter
       discovery:
         locator:
           enabled: false
@@ -74,7 +80,9 @@ spring:
       globalcors:
         corsConfigurations:
           '[/**]':
-            allowedOriginPatterns: "*"
+            allowedOrigins:
+              - "http://localhost:8080"
+              - "http://14.63.178.155:8080"
             allowedMethods:
               - GET
               - POST
@@ -97,12 +105,3 @@ springdoc:
       - name: matching-service
         url: /matching-service/v3/api-docs
     path: /swagger-ui.html
-
-eureka:
-  client:
-    register-with-eureka: true
-    fetch-registry: true
-    service-url:
-      defaultZone: http://eureka:eurekapwd@localhost:8761/eureka/,http://eureka:eurekapwd@localhost:8762/eureka/
-  instance:
-    prefer-ip-address: true

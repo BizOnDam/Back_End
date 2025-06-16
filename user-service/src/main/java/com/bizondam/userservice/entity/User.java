@@ -18,9 +18,9 @@ public class User {
   private String position;
   private String roleDesc;
   private String phoneNumber;
-  private RoleInCompany roleInCompany;
+  private RoleInCompany roleInCompany; // CEO or STAFF
   private Boolean isVerified;
-  private String authProvider;  // PASS or EMAIL
+  private String authProvider;  // EMAIL
   private LocalDateTime createdAt;
   private LocalDateTime updatedAt;
 }

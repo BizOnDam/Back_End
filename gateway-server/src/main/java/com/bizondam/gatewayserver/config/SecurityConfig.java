@@ -17,7 +17,10 @@ public class SecurityConfig {
             .pathMatchers(
                 "/swagger-ui.html",
                 "/swagger-ui/**",
-                "/v3/api-docs/**"
+                "/v3/api-docs/**",
+                "/swagger-resources/**",
+                "/webjars/**",
+                "/favicon.ico"
             ).permitAll()
             .anyExchange().permitAll() // 필요시 authenticated()로 변경
         );
