@@ -26,7 +26,12 @@
   <!-- 3. 공급 업체 지정 (PATCH) -->
   <update id="updateSupplierCompany">
     UPDATE estimate_request
-    SET supplier_company_id = #{supplierCompanyId}
+    SET supplier_company_id = (
+      SELECT company_id
+      FROM companies
+      WHERE business_number = #{businessNumber}
+      LIMIT 1
+      )
     WHERE request_id = #{requestId}
   </update>
 

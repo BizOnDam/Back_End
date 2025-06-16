@@ -14,6 +14,12 @@ public class ContractItemDto {
   private String specification;
   private Integer quantity;
 
+  // product_meta_batch
+  private String categoryCode;
+  private String categoryName;
+  private String detailCategoryCode;
+  private String detailCategoryName;
+
   // estimate_response_item
   private Long responseItemId;
   private Long responseId;
