@@ -15,7 +15,7 @@ public interface EstimateRequestMapper {
       @Param("item") EstimateRequestItemDto item);
   // 3) 공급 업체 지정 시, estimate_request.supplier_company_id UPDATE
   void updateSupplierCompany(@Param("requestId") Long requestId,
-      @Param("supplierCompanyId") Long supplierCompanyId);
+      @Param("businessNumber") String businessNumber);
   // 4) 계약 체결/미체결 시, estimate_request.status를 UPDATE
   void updateRequestStatus(@Param("requestId") Long requestId,
       @Param("status") Integer status);

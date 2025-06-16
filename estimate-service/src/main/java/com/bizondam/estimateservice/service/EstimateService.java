@@ -1,15 +1,15 @@
 package com.bizondam.estimateservice.service;
 
 import com.bizondam.common.exception.CustomException;
-import com.bizondam.estimateservice.dto.EstimateRequestCreateDto;
-import com.bizondam.estimateservice.dto.EstimateRequestItemDto;
-import com.bizondam.estimateservice.dto.EstimateResponseCreateDto;
+import com.bizondam.estimateservice.dto.*;
 import com.bizondam.estimateservice.exception.EstimateErrorCode;
+import com.bizondam.estimateservice.mapper.ContractMapper;
 import com.bizondam.estimateservice.mapper.EstimateRequestMapper;
 import com.bizondam.estimateservice.mapper.EstimateResponseMapper;
 import com.bizondam.estimateservice.model.EstimateRequestItem;
 import java.util.ArrayList;
 import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class EstimateService {
   private final EstimateRequestMapper requestMapper;
   private final EstimateResponseMapper responseMapper;
+  private final ContractMapper contractMapper;
 
   // 1) 견적 요청서 생성
   @Transactional
@@ -39,8 +40,8 @@ public class EstimateService {
 
   // 2) 수요 업체에서 공급 업체 지정
   @Transactional
-  public void assignSupplier(Long requestId, Long supplierCompanyId) {
-    requestMapper.updateSupplierCompany(requestId, supplierCompanyId);
+  public void assignSupplierByBusinessNumber(Long requestId, String businessNumber) {
+    requestMapper.updateSupplierCompany(requestId, businessNumber);
   }
 
   // 3) 견적 응답 생성(공급 업체에서 답변)
@@ -73,19 +74,64 @@ public class EstimateService {
     }
 
     responseMapper.updateResponseStatus(responseId, 3);
+
+    // ContractMapper로 한 번에 조회
+    ContractDto contractData = contractMapper.findContractByRequestIdAndResponseId(requestId, responseId);
+
+    // 계약 정보 생성
+    ContractCreateDto contract = new ContractCreateDto();
+    contract.setResponseId(responseId);
+    contract.setBuyerUserId(contractData.getBuyerUserId());
+    contract.setBuyerCompanyId(contractData.getBuyerCompanyId());
+    contract.setSupplierCompanyId(contractData.getSupplierCompanyId());
+    contract.setSupplierUserId(contractData.getSupplierUserId());
+    contract.setStatus(1);  // 거래중
+    contract.setContractFileUrl(null); // 나중에 PATCH
+
+    // 계약 저장
+    contractMapper.insertContract(contract);
   }
 
-  // 5) 계약 미체결
+
+  // 5) 계약 미체결 - 수요 업체가 거절한 경우
   @Transactional
-  public void rejectContract(Long requestId) {
+  public void rejectByBuyer(Long requestId) {
     requestMapper.updateRequestStatus(requestId, 4);
 
     Long responseId = responseMapper.findResponseIdByRequestId(requestId);
     if (responseId == null) {
       throw new CustomException(EstimateErrorCode.ESTIMATE_NOT_FOUND);
     }
-
     responseMapper.updateResponseStatus(responseId, 4);
+  }
+
+  // 6) 계약 미체결 - 공급 업체가 거절한 경우
+  @Transactional
+  public void rejectBySupplier(Long requestId, Long supplierUserId) {
+    requestMapper.updateRequestStatus(requestId, 4);
+
+    // 응답 ID 조회
+    Long responseId = responseMapper.findResponseIdByRequestId(requestId);
+
+    if (responseId != null) {
+      // 응답이 이미 있는 경우 - 상태만 4로 변경
+      responseMapper.updateResponseStatus(responseId, 4);
+    } else {
+      // 응답이 없는 경우 - 새 응답 생성 후 상태 4로
+      EstimateResponseCreateDto newResponse = new EstimateResponseCreateDto();
+      newResponse.setRequestId(requestId);
+      newResponse.setSupplierUserId(supplierUserId);
+      newResponse.setStatus(4);  // 바로 거절 상태
+      newResponse.setTotalPrice(0L); // 금액 없음
+      newResponse.setPaymentTerms(null);
+      newResponse.setWarranty(null);
+      newResponse.setSpecialTerms("공급자 거절");
+
+      responseMapper.insertEstimateResponse(newResponse);
+      // 생성된 응답 ID 다시 조회
+      responseId = newResponse.getResponseId();
+      responseMapper.updateResponseStatus(responseId, 4); // 상태 4로 변경
+    }
   }
 
   public List<EstimateRequestItem> createEstimateAndReturnItems(EstimateRequestCreateDto dto) {

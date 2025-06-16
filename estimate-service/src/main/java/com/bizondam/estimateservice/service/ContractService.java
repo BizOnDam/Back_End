@@ -24,4 +24,40 @@ public class ContractService {
     dto.setItems(items);
     return dto;
   }
+
+  // 견적 요청서만 존재하는 경우
+  public ContractDto getContractWithoutResponse(Long requestId) {
+    ContractDto dto = contractMapper.findContractByRequestIdOnly(requestId);
+    if (dto == null) {
+      throw new CustomException(EstimateErrorCode.ESTIMATE_NOT_FOUND);
+    }
+    // items 채우기
+    List<ContractItemDto> items = contractMapper.findContractItemsByRequestIdOnly(requestId);
+    dto.setItems(items);
+    return dto;
+  }
+
+  public List<ContractDto> getRequestsForBuyer(Long companyId) {
+    List<ContractDto> list = contractMapper.selectContractsByBuyerCompany(companyId);
+    // items 채우기
+    for (ContractDto dto : list) {
+      List<ContractItemDto> items = contractMapper.findContractItemsByRequestIdAndResponseId(
+              dto.getRequestId(), dto.getResponseId()
+      );
+      dto.setItems(items);
+    }
+    return list;
+  }
+
+  public List<ContractDto> getRequestsForSupplier(Long companyId) {
+    List<ContractDto> list = contractMapper.selectContractsBySupplierCompany(companyId);
+    // items 채우기
+    for (ContractDto dto : list) {
+      List<ContractItemDto> items = contractMapper.findContractItemsByRequestIdAndResponseId(
+              dto.getRequestId(), dto.getResponseId()
+      );
+      dto.setItems(items);
+    }
+    return list;
+  }
 }

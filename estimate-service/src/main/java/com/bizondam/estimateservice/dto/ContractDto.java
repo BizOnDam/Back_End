@@ -28,6 +28,10 @@ public class ContractDto {
   private String specialTerms;
   private LocalDateTime responseCreatedAt;
 
+  // 회사 이름
+  private String buyerCompanyName;
+  private String supplierCompanyName;
+
   // 하위 항목들
   private List<ContractItemDto> items;
 }

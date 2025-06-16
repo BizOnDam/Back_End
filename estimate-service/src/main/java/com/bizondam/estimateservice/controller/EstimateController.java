@@ -1,7 +1,6 @@
 package com.bizondam.estimateservice.controller;
 
 import com.bizondam.common.response.BaseResponse;
-import com.bizondam.common.security.CustomUserDetails;
 import com.bizondam.estimateservice.dto.EstimateRequestCreateDto;
 import com.bizondam.estimateservice.dto.EstimateResponseCreateDto;
 import com.bizondam.estimateservice.model.EstimateRequestItem;
@@ -10,14 +9,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/estimates")
@@ -35,8 +27,8 @@ public class EstimateController {
   @Operation(summary = "공급 업체 지정", description = "수요 업체에서 공급 업체를 선정한 경우")
   @PatchMapping("/{requestId}/assign-supplier")
   public ResponseEntity<BaseResponse<Void>> assignSupplier(@PathVariable Long requestId,
-      @RequestParam("supplierCompanyId") Long supplierCompanyId) {
-    estimateService.assignSupplier(requestId, supplierCompanyId);
+      @RequestParam("businessNumber") String businessNumber) {
+    estimateService.assignSupplierByBusinessNumber(requestId, businessNumber);
     return ResponseEntity.ok(BaseResponse.success("공급업체 지정 완료", null));
   }
 
@@ -54,10 +46,18 @@ public class EstimateController {
     return ResponseEntity.ok(BaseResponse.success(requestId + " 계약 체결 성공", true));
   }
 
-  @Operation(summary = "계약 미체결", description = "어느 한 쪽에서 계약을 거절한 경우.")
-  @PatchMapping("/{requestId}/reject")
-  public ResponseEntity<BaseResponse<Boolean>> rejectContract(@PathVariable Long requestId) {
-    estimateService.rejectContract(requestId);
+  @Operation(summary = "계약 미체결 - 수요 업체용", description = "수요 업체에서 계약을 거절한 경우.")
+  @PatchMapping("/reject-buyer/{requestId}")
+  public ResponseEntity<BaseResponse<Boolean>> rejectByBuyer(@PathVariable Long requestId) {
+    estimateService.rejectByBuyer(requestId);
     return ResponseEntity.ok(BaseResponse.success(requestId + " 계약 미체결", false));
   }
+
+  @Operation(summary = "계약 미체결 - 공급 업체용", description = "공급 업체에서 계약을 거절한 경우.")
+  @PutMapping("/reject-supplier/{requestId}")
+  public ResponseEntity<?> rejectBySupplier(@PathVariable Long requestId, @RequestParam Long supplierUserId) {
+    estimateService.rejectBySupplier(requestId, supplierUserId);
+    return ResponseEntity.ok().build();
+  }
+
 }

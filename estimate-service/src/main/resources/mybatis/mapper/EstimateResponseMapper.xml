@@ -10,7 +10,7 @@
     INSERT INTO estimate_response (
       request_id, supplier_user_id, status, total_price, payment_terms, warranty, special_terms
     ) VALUES (
-               #{requestId}, #{supplierUserId}, 1, #{totalPrice}, #{paymentTerms}, #{warranty}, #{specialTerms}
+               #{requestId}, #{supplierUserId}, 2, #{totalPrice}, #{paymentTerms}, #{warranty}, #{specialTerms}
              )
   </insert>
 
