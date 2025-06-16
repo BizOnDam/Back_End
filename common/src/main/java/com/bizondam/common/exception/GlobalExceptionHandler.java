@@ -2,7 +2,6 @@ package com.bizondam.common.exception;
 
 import com.bizondam.common.exception.model.BaseErrorCode;
 import com.bizondam.common.response.BaseResponse;
-import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
