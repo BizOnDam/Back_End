@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -31,16 +32,23 @@ public class AuthController {
     return ResponseEntity.ok(BaseResponse.success("로그인 성공", loginResponse));
   }
 
-  @Operation(summary = "토큰 재발급", description = "access, refresh 토큰 모두 재발급(refresh 토큰 만료 시)")
-  @PostMapping("/refresh-token")
-  public ResponseEntity<BaseResponse<LoginResponse>> refreshToken(@RequestBody RefreshTokenRequest request) {
+  @Operation(summary = "access 토큰 재발급", description = "access 토큰 재발급(refresh 토큰 이용)")
+  @PostMapping("/reissue-access-token")
+  public ResponseEntity<BaseResponse<LoginResponse>> reissueAccessToken(
+      @RequestParam Long userId, @RequestParam String refreshToken) {
+    LoginResponse response = authService.reissueAccessToken(userId, refreshToken);
+    return ResponseEntity.ok(BaseResponse.success("Access 토큰 재발급 성공", response));
+  }
+
+  @Operation(summary = "refresh && access 토큰 재발급", description = "access, refresh 토큰 모두 재발급(refresh 토큰 만료 시)")
+  @PostMapping("/reissue-refresh-token")
+  public ResponseEntity<BaseResponse<LoginResponse>> reissueRefreshToken(@RequestBody RefreshTokenRequest request) {
     boolean isValid = authService.validateRefreshToken(request.getUserId(), request.getRefreshToken());
     if (!isValid) {
       throw new CustomException(AuthErrorCode.REFRESH_TOKEN_REQUIRED);
     }
-    // 새 AccessToken, RefreshToken 발급 로직
-    LoginResponse response = authService.reissueTokens(request.getUserId(), request.getRefreshToken());
-    return ResponseEntity.ok(BaseResponse.success("토큰 재발급 성공", response));
+    LoginResponse response = authService.reissueRefreshTokens(request.getUserId(), request.getRefreshToken());
+    return ResponseEntity.ok(BaseResponse.success("Refresh, Access 토큰 재발급 성공", response));
   }
 
   @Operation(summary = "로그아웃", description = "리프레시 토큰 폐기")
