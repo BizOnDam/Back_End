@@ -1,9 +1,10 @@
 package com.bizondam.gatewayserver.filter;
 
+import com.bizondam.common.exception.AuthErrorCode;
 import com.bizondam.common.exception.CustomException;
+import com.bizondam.common.exception.model.BaseErrorCode;
 import com.bizondam.common.jwt.JwtProvider;
 import com.bizondam.gatewayserver.validator.RouteValidator;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
@@ -15,11 +16,9 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
-// 모든 요청에 대해 JWT 토큰의 유효성을 검증하는 Gateway 필터.
-// 인증이 필요 없는 경로는 RouteValidator로 건너뜀
-// 토큰이 유효하지 않으면 커스텀 예외를 통해 401 반환
 @Slf4j
 @Component
+// 모든 요청에 대해 JWT 토큰의 유효성을 검증하는 Gateway 필터
 public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAuthenticationFilter.Config> {
 
   private final JwtProvider jwtProvider;
@@ -64,9 +63,32 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
             // 5. 예외 발생 시 커스텀 예외 메시지와 상태 코드 반환
             if (e instanceof CustomException) {
               CustomException ce = (CustomException) e;
-              return onError(exchange, ce.getErrorCode().getMessage(), ce.getErrorCode().getStatus());
+              BaseErrorCode errorCode = ce.getErrorCode();
+
+              // BaseErrorCode가 AuthErrorCode 타입인지 확인 (다른 도메인 에러코드와의 혼동 방지)
+              if (errorCode instanceof AuthErrorCode) {
+                AuthErrorCode authErrorCode = (AuthErrorCode) errorCode;
+
+                // JWT 토큰 만료 예외 처리
+                if (authErrorCode == AuthErrorCode.JWT_TOKEN_EXPIRED) {
+                  // 클라이언트에게 액세스 토큰 만료 메시지와 401 상태코드 반환
+                  return onError(exchange, "ACCESS_TOKEN_EXPIRED: " + authErrorCode.getMessage(), HttpStatus.UNAUTHORIZED);
+                }
+                // JWT 토큰이 유효하지 않은 경우 (형식 오류, 서명 오류 등)
+                else if (authErrorCode == AuthErrorCode.INVALID_ACCESS_TOKEN ||
+                    authErrorCode == AuthErrorCode.UNSUPPORTED_TOKEN ||
+                    authErrorCode == AuthErrorCode.MALFORMED_JWT_TOKEN ||
+                    authErrorCode == AuthErrorCode.INVALID_SIGNATURE ||
+                    authErrorCode == AuthErrorCode.ILLEGAL_ARGUMENT) {
+                  // 클라이언트에게 유효하지 않은 토큰 메시지와 401 상태코드 반환
+                  return onError(exchange, "INVALID_ACCESS_TOKEN: " + authErrorCode.getMessage(), HttpStatus.UNAUTHORIZED);
+                }
+              }
+              // 만약 AuthErrorCode가 아닌 다른 도메인 에러코드라면, 해당 에러코드의 메시지와 상태코드로 반환
+              return onError(exchange, errorCode.getMessage(), errorCode.getStatus());
             }
-            return onError(exchange, "Invalid token", HttpStatus.UNAUTHORIZED);
+            // CustomException이 아닌 예외가 발생한 경우, 내부 서버 오류로 처리
+            return onError(exchange, "Invalid authentication token", HttpStatus.INTERNAL_SERVER_ERROR);
           });
     };
   }

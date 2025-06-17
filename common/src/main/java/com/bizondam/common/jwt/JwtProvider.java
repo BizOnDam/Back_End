@@ -25,8 +25,7 @@ public class JwtProvider {
   public JwtProvider(
       @Value("${jwt.secretKey}") String secretKeyString,
       @Value("${jwt.accessTokenExpireTime}") long accessTokenExpireTime,
-      @Value("${jwt.refreshTokenExpireTime}") long refreshTokenExpireTime
-  ) {
+      @Value("${jwt.refreshTokenExpireTime}") long refreshTokenExpireTime) {
     byte[] keyBytes = Base64.getDecoder().decode(secretKeyString);
     this.secretKey = Keys.hmacShaKeyFor(keyBytes);
     this.accessTokenExpireTime = accessTokenExpireTime;
@@ -67,8 +66,14 @@ public class JwtProvider {
           .getBody();
     } catch (ExpiredJwtException e) {
       throw new CustomException(AuthErrorCode.JWT_TOKEN_EXPIRED);
-    } catch (UnsupportedJwtException | MalformedJwtException | SignatureException | IllegalArgumentException e) {
-      throw new CustomException(AuthErrorCode.INVALID_ACCESS_TOKEN);
+    } catch (UnsupportedJwtException e) {
+      throw new CustomException(AuthErrorCode.UNSUPPORTED_TOKEN);
+    } catch (MalformedJwtException e) {
+      throw new CustomException(AuthErrorCode.MALFORMED_JWT_TOKEN);
+    } catch (SignatureException e) {
+      throw new CustomException(AuthErrorCode.INVALID_SIGNATURE);
+    } catch (IllegalArgumentException e) {
+      throw new CustomException(AuthErrorCode.ILLEGAL_ARGUMENT);
     }
   }
 
