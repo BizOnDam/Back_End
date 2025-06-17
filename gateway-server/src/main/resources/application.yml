@@ -94,7 +94,13 @@ spring:
             allowCredentials: true
 
 springdoc:
+  enable-native-support: true
+  api-docs:
+    enabled: true
   swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+    config-url: /v3/api-docs/swagger-config
     urls:
       - name: company-service
         url: /company-service/v3/api-docs
@@ -104,4 +110,3 @@ springdoc:
         url: /estimate-service/v3/api-docs
       - name: matching-service
         url: /matching-service/v3/api-docs
-    path: /swagger-ui.html
