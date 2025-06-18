@@ -12,6 +12,7 @@ import com.bizondam.userservice.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -44,9 +45,12 @@ public class UserController {
   public ResponseEntity<BaseResponse<Boolean>> checkLoginId(@RequestParam String loginId) {
     boolean isDuplicate = userService.isLoginIdDuplicate(loginId);
     if (isDuplicate) {
-      return ResponseEntity.ok(BaseResponse.success("이미 사용 중인 아이디입니다.", true));
+      return ResponseEntity
+          .status(HttpStatus.CONFLICT)
+          .body(BaseResponse.fail("이미 사용 중인 아이디입니다.", true));
     } else {
-      return ResponseEntity.ok(BaseResponse.success("사용 가능한 아이디입니다.", false));
+      return ResponseEntity
+          .ok(BaseResponse.success("사용 가능한 아이디입니다.", false));
     }
   }
 
@@ -64,7 +68,7 @@ public class UserController {
     if (verified) {
       return ResponseEntity.ok(BaseResponse.success("이메일 인증 성공", true));
     } else {
-      return ResponseEntity.badRequest().body(BaseResponse.error(400, "인증코드가 일치하지 않거나 만료되었습니다."));
+      return ResponseEntity .badRequest().body(BaseResponse.fail("인증코드가 일치하지 않거나 만료되었습니다.", false));
     }
   }
 }
