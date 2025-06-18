@@ -1,6 +1,5 @@
 package com.bizondam.userservice.controller;
 
-import com.bizondam.common.exception.AuthErrorCode;
 import com.bizondam.common.exception.CustomException;
 import com.bizondam.common.response.BaseResponse;
 import com.bizondam.userservice.dto.request.LoginRequest;
@@ -11,6 +10,7 @@ import com.bizondam.userservice.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -32,10 +32,10 @@ public class AuthController {
       LoginResponse loginResponse = authService.login(request.getLoginId(), request.getLoginPwd());
       return ResponseEntity.ok(BaseResponse.success("로그인 성공", loginResponse));
     } catch (CustomException e) {
-      AuthErrorCode code = (AuthErrorCode) e.getErrorCode();
+      // 예: 아이디/비밀번호 불일치, 계정 정지 등
       return ResponseEntity
-          .status(code.getStatus())
-          .body(BaseResponse.fail(code.getMessage(), null));
+          .status(e.getErrorCode().getStatus()) // 예: 401 Unauthorized
+          .body(BaseResponse.fail(e.getMessage(), null));
     }
   }
 
@@ -47,10 +47,10 @@ public class AuthController {
       LoginResponse response = authService.reissueAccessToken(userId, refreshToken);
       return ResponseEntity.ok(BaseResponse.success("Access 토큰 재발급 성공", response));
     } catch (CustomException e) {
-      AuthErrorCode code = (AuthErrorCode) e.getErrorCode();
+      // 예: 토큰 만료, 위조, 매칭 실패 등
       return ResponseEntity
-          .status(code.getStatus())
-          .body(BaseResponse.fail(code.getMessage(), null));
+          .status(e.getErrorCode().getStatus()) // 예: 401 Unauthorized, 400 Bad Request 등
+          .body(BaseResponse.fail(e.getMessage(), null));
     }
   }
 
@@ -60,19 +60,17 @@ public class AuthController {
     try {
       boolean isValid = authService.validateRefreshToken(request.getUserId(), request.getRefreshToken());
       if (!isValid) {
-        // AuthErrorCode 사용
-        AuthErrorCode code = AuthErrorCode.REFRESH_TOKEN_REQUIRED;
+        // 예: 토큰 만료, 위조, 매칭 실패 등
         return ResponseEntity
-            .status(code.getStatus())
-            .body(BaseResponse.fail(code.getMessage(), null));
+            .status(HttpStatus.UNAUTHORIZED)
+            .body(BaseResponse.fail("Refresh 토큰이 유효하지 않습니다.", null));
       }
       LoginResponse response = authService.reissueRefreshTokens(request.getUserId(), request.getRefreshToken());
       return ResponseEntity.ok(BaseResponse.success("Refresh, Access 토큰 재발급 성공", response));
     } catch (CustomException e) {
-      AuthErrorCode code = (AuthErrorCode) e.getErrorCode();
       return ResponseEntity
-          .status(code.getStatus())
-          .body(BaseResponse.fail(code.getMessage(), null));
+          .status(e.getErrorCode().getStatus())
+          .body(BaseResponse.fail(e.getMessage(), null));
     }
   }
 
@@ -83,10 +81,10 @@ public class AuthController {
       authService.logout(request.getUserId(), request.getRefreshToken());
       return ResponseEntity.ok(BaseResponse.success("로그아웃 성공", null));
     } catch (CustomException e) {
-      AuthErrorCode code = (AuthErrorCode) e.getErrorCode();
+      // 예: 토큰이 유효하지 않음, 이미 만료됨 등
       return ResponseEntity
-          .status(code.getStatus())
-          .body(BaseResponse.fail(code.getMessage(), null));
+          .status(e.getErrorCode().getStatus()) // 예: 400, 401 등
+          .body(BaseResponse.fail(e.getMessage(), null));
     }
   }
 }

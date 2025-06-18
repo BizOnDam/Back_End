@@ -4,12 +4,16 @@ import com.bizondam.common.exception.AuthErrorCode;
 import com.bizondam.common.exception.CustomException;
 import com.bizondam.common.exception.model.BaseErrorCode;
 import com.bizondam.common.jwt.JwtProvider;
+import com.bizondam.common.response.BaseResponse;
 import com.bizondam.gatewayserver.validator.RouteValidator;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
@@ -93,10 +97,19 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
     };
   }
 
-  private Mono<Void> onError(ServerWebExchange exchange, String errorMsg, HttpStatus httpStatus) {
-    log.warn("JWT 인증 실패: {}", errorMsg);
-    exchange.getResponse().setStatusCode(httpStatus);
-    return exchange.getResponse().setComplete();
+  private Mono<Void> onError(ServerWebExchange exchange, String message, HttpStatus status) {
+    exchange.getResponse().setStatusCode(status);
+    exchange.getResponse().getHeaders().setContentType(MediaType.APPLICATION_JSON);
+    ObjectMapper om = new ObjectMapper();
+    BaseResponse<Object> errorBody = BaseResponse.fail(401, "JWT 토큰이 만료되었습니다", null);
+
+    try {
+      byte[] bytes = om.writeValueAsBytes(errorBody); // JSON 직렬화
+      DataBuffer buffer = exchange.getResponse().bufferFactory().wrap(bytes);
+      return exchange.getResponse().writeWith(Mono.just(buffer));
+    } catch (Exception e) {
+      return exchange.getResponse().setComplete();
+    }
   }
 
   public static class Config {
