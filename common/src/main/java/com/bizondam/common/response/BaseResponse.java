@@ -34,4 +34,8 @@ public class BaseResponse<T> {
   public static <T> BaseResponse<T> error(int code, String message) {
     return new BaseResponse<>(false, code, message, null);
   }
+
+  public static <T> BaseResponse<T> fail(String message, T data) {
+    return new BaseResponse<>(false, 400, message, data);
+  }
 }
