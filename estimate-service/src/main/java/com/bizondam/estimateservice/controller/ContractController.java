@@ -2,6 +2,7 @@ package com.bizondam.estimateservice.controller;
 
 import com.bizondam.common.response.BaseResponse;
 import com.bizondam.estimateservice.dto.ContractDto;
+import com.bizondam.estimateservice.dto.ContractListResponse;
 import com.bizondam.estimateservice.service.ContractService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
@@ -52,5 +53,17 @@ public class ContractController {
   ) {
     List<ContractDto> list = contractService.getRequestsForSupplier(companyId);
     return ResponseEntity.ok(BaseResponse.success("할당된 요청 리스트 조회", list));
+  }
+
+  @Operation(summary = "진행중인 계약 리스트", description = "사용자에게 할당된 모든 계약 목록 반환")
+  @GetMapping("/list")
+  public ResponseEntity<BaseResponse<List<ContractListResponse>>> getContractList(
+          @RequestParam Long userId,
+          @RequestParam Long companyId,
+          @RequestParam String role,
+          @RequestParam(required = false) String date
+  ) {
+    List<ContractListResponse> list = contractService.getContractList(userId, companyId, role, date);
+    return ResponseEntity.ok(BaseResponse.success("계약 리스트 조회", list));
   }
 }

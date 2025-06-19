@@ -32,6 +32,22 @@ public class ContractDto {
   private String buyerCompanyName;
   private String supplierCompanyName;
 
+  // 회사 주소
+  private String buyerCompanyAddress;
+  private String buyerCompanyAddressDetail;
+
+  // 수요 업체 담당자 정보
+  private String buyerUserName;
+  private String buyerUserPhone;
+
+  // 공급 업체 담당자 정보
+  private String supplierUserName;
+  private String supplierUserPhone;
+
+  // 계약 정보
+  private Long contractId;
+  private LocalDateTime contractCreatedAt;
+
   // 하위 항목들
   private List<ContractItemDto> items;
 }

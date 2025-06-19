@@ -4,6 +4,8 @@ import com.bizondam.estimateservice.dto.ContractCreateDto;
 import com.bizondam.estimateservice.dto.ContractDto;
 import com.bizondam.estimateservice.dto.ContractItemDto;
 import java.util.List;
+
+import com.bizondam.estimateservice.dto.ContractListResponse;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -29,4 +31,11 @@ public interface ContractMapper {
 
   // 공급 기업용 리스트
   List<ContractDto> selectContractsBySupplierCompany(@Param("companyId") Long companyId);
+
+  // 계약 리스트 - 수요 기업용
+  List<ContractListResponse> findContractsByBuyer(@Param("companyId") Long companyId, @Param("userId") Long userId);
+
+  // 계약 리스트 - 공급 기업용
+  List<ContractListResponse> findContractsBySupplier(@Param("companyId") Long companyId, @Param("userId") Long userId);
+
 }

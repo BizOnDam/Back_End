@@ -18,34 +18,44 @@
   <!-- 계약서 메타+응답+요청 정보 조회 -->
   <select id="findContractByRequestIdAndResponseId" resultMap="ContractResultMap" parameterType="map">
     SELECT
-      er.request_id,
-      er.buyer_user_id,
-      er.buyer_company_id,
-      cb.company_name_kr AS buyer_company_name,
-      er.supplier_company_id,
-      cs.company_name_kr AS supplier_company_name,
-      er.status AS request_status,
+      er.request_id,                                            -- 견적 요청 ID
+      er.buyer_user_id,                                         -- 구매자 ID
+      er.buyer_company_id,                                      -- 수요 기업 정보
+      cb.company_name_kr    AS buyer_company_name,
+      cb.address            AS buyer_company_address,
+      cb.address_detail     AS buyer_company_address_detail,
+      er.supplier_company_id,                                   -- 공급기업 ID
+      cs.company_name_kr    AS supplier_company_name,           -- 공급기업명
+      er.status             AS request_status,                  -- estimate_request
       er.detail,
       er.due_date,
-      er.created_at AS request_created_at,
-      resp.response_id,
-      resp.supplier_user_id,
-      resp.status AS response_status,
+      er.created_at         AS request_created_at,
+      resp.response_id,                                         -- 견적 응답 ID
+      resp.supplier_user_id,                                    -- 공급자 ID
+      resp.status           AS response_status,                 -- estimate_response
       resp.total_price,
       resp.payment_terms,
       resp.warranty,
       resp.special_terms,
-      resp.created_at     AS response_created_at
-    FROM estimate_request er
-           JOIN estimate_response resp
-                ON er.request_id = resp.request_id
-           JOIN companies cb
-                ON er.buyer_company_id = cb.company_id
-           JOIN companies cs
-                ON er.supplier_company_id = cs.company_id
+      resp.created_at       AS response_created_at,
+      bu.name_kr            AS buyer_user_name,         -- 구매자 정보
+      bu.phone_number       AS buyer_user_phone,
+      su.name_kr            AS supplier_user_name,      -- 공급자 정보
+      su.phone_number       AS supplier_user_phone,
+      c.contract_id         AS contract_id,
+      c.created_at          AS contract_created_at      -- 계약 체결일
+
+    FROM contracts c
+           JOIN estimate_response   resp ON c.response_id = resp.response_id
+           JOIN estimate_request    er ON resp.request_id = er.request_id
+           JOIN companies           cb ON er.buyer_company_id = cb.company_id
+           JOIN companies           cs ON er.supplier_company_id = cs.company_id
+           JOIN users               bu ON c.buyer_user_id = bu.user_id
+           JOIN users               su ON c.supplier_user_id = su.user_id
     WHERE er.request_id = #{requestId}
       AND resp.response_id = #{responseId}
   </select>
+
 
   <!-- 품목 리스트 조회 -->
   <select id="findContractItemsByRequestIdAndResponseId" resultMap="ContractItemResultMap" parameterType="map">
@@ -173,6 +183,40 @@
     ORDER BY er.created_at DESC
   </select>
 
+<!--  BUYER인 경우 계약서 조회-->
+  <select id="findContractsByBuyer" resultType="com.bizondam.estimateservice.dto.ContractListResponse">
+    SELECT
+      c.contract_id          AS contractId,
+      q.request_id           AS requestId,
+      r.response_id          AS responseId,
+      c.supplier_company_id  AS supplierCompanyId,
+      r.total_price          AS totalPrice,
+      DATE_FORMAT(c.created_at, '%Y-%m-%d') AS contractDate,
+      q.due_date             AS dueDate
+    FROM contracts c
+           JOIN estimate_response r ON c.response_id = r.response_id
+           JOIN estimate_request q ON r.request_id = q.request_id
+    WHERE c.buyer_company_id = #{companyId}
+      AND c.buyer_user_id = #{userId}
+  </select>
+
+  <!--  SUPPLIER인 경우 계약서 조회-->
+  <select id="findContractsBySupplier" resultType="ContractListResponse" parameterType="map">
+    SELECT
+      c.contract_id          AS contractId,
+      q.request_id           AS requestId,
+      r.response_id          AS responseId,
+      c.supplier_company_id  AS supplierCompanyId,
+      r.total_price          AS totalPrice,
+      DATE_FORMAT(c.created_at, '%Y-%m-%d') AS contractDate,
+      q.due_date             AS dueDate
+    FROM contracts c
+           JOIN estimate_response r ON c.response_id = r.response_id
+           JOIN estimate_request q ON r.request_id = q.request_id
+    WHERE c.supplier_company_id = #{companyId}
+      AND c.supplier_user_id = #{userId}
+  </select>
+
   <!-- ResultMap 정의 -->
   <resultMap id="ContractResultMap" type="ContractDto">
     <id property="requestId"                column="request_id"/>
@@ -193,11 +237,14 @@
     <result property="responseCreatedAt"    column="response_created_at"/>
     <result property="buyerCompanyName"     column="buyer_company_name"/>
     <result property="supplierCompanyName"  column="supplier_company_name"/>
+    <result property="contractId"           column="contract_id"/>
+    <result property="contractCreatedAt"    column="contract_created_at"/>
+
     <!-- items 컬렉션은 서비스에서 별도 조회 -->
   </resultMap>
 
   <resultMap id="ContractItemResultMap" type="ContractItemDto">
-    <id property="itemId" column="item_id"/>
+<!--    <id     property="itemId" column="item_id"/>-->
     <id     property="itemId"               column="item_item_id"/>
     <result property="requestId"            column="item_request_id"/>
     <result property="productId"            column="item_product_id"/>
