@@ -26,3 +26,9 @@ national-tax:
   api-url: https://api.odcloud.kr/api/nts-businessman/v1/validate
   service-key: ${NATIONAL_TAX_API_KEY}
   return-type: JSON
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true

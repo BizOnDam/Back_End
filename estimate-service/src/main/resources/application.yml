@@ -16,3 +16,9 @@ spring:
 mybatis:
   mapper-locations: classpath*:mybatis/mapper/*.xml
   type-aliases-package: com.bizondam.estimateservice.dto
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
