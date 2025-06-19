@@ -33,11 +33,16 @@ public class UserController {
   @Operation(summary = "회원가입", description = "새로운 유저 등록: 회사 내 최초 가입자는 CEO, 이후 가입자는 STAFF")
   @PostMapping("/register")
   public ResponseEntity<BaseResponse<SignUpResponse>> register(@RequestBody @Validated SignUpRequest request) {
-    if (!emailAuthService.isVerified(request.getEmail(), request.getCode())) {
-      throw new CustomException(UserErrorCode.EMAIL_NOT_VERIFIED);
+    try {
+      if (!emailAuthService.isVerified(request.getEmail(), request.getCode())) {
+        throw new CustomException(UserErrorCode.EMAIL_NOT_VERIFIED);
+      }
+      SignUpResponse resp = userService.registerUser(request);
+      return ResponseEntity.ok(BaseResponse.success("회원가입에 성공했습니다.", resp));
+    } catch (IllegalArgumentException e) {
+      // 휴대폰 번호 중복 예외 처리
+      return ResponseEntity.badRequest().body(BaseResponse.error(400, e.getMessage()));
     }
-    SignUpResponse resp = userService.registerUser(request);
-    return ResponseEntity.ok(BaseResponse.success("회원가입에 성공했습니다.", resp));
   }
 
   @Operation(summary = "아이디 중복 검사", description = "같은 아이디로 가입 불가능")
@@ -57,8 +62,12 @@ public class UserController {
   @Operation(summary = "이메일 인증(유효기간 10분)", description = "이메일로 랜덤 6자리 인증번호 발송")
   @PostMapping("/email-auth")
   public ResponseEntity<BaseResponse<Void>> sendEmailAuthCode(@RequestBody EmailSendRequest request) {
-    emailAuthService.createAndSendAuthCode(request.getEmail());
-    return ResponseEntity.ok(BaseResponse.success("인증코드가 발송되었습니다.", null));
+    try {
+      emailAuthService.createAndSendAuthCode(request.getEmail());
+      return ResponseEntity.ok(BaseResponse.success("인증코드가 발송되었습니다.", null));
+    } catch (IllegalArgumentException e) {
+      return ResponseEntity.badRequest().body(BaseResponse.error(400, e.getMessage()));
+    }
   }
 
   @Operation(summary = "인증번호 검증", description = "DB에 존재하는 인증번호와 일치하는지 검사")

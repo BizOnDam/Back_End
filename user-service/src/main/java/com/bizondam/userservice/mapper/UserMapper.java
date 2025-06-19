@@ -12,4 +12,6 @@ public interface UserMapper {
   int insertUser(User user);
   //기존 사용자 조회
   int countByLoginId(@Param("loginId") String loginId);
+  //휴대폰 번호로 사용자 조회
+  boolean existsByPhoneNumber(@Param("phoneNumber") String phoneNumber);
 }

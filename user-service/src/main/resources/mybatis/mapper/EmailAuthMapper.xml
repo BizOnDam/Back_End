@@ -16,4 +16,7 @@
   <delete id="deleteByEmail" parameterType="string">
     DELETE FROM email_auth WHERE email = #{email}
   </delete>
+  <select id="existsByEmail" parameterType="string" resultType="boolean">
+    SELECT EXISTS(SELECT 1 FROM users WHERE email = #{email})
+  </select>
 </mapper>

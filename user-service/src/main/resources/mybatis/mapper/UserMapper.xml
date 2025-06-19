@@ -54,4 +54,9 @@
   <select id="countByLoginId" parameterType="string" resultType="int">
     SELECT COUNT(*) FROM users WHERE login_id = #{loginId}
   </select>
+
+  <!-- 휴대폰 번호로 중복 여부 조회 -->
+  <select id="existsByPhoneNumber" parameterType="string" resultType="boolean">
+    SELECT EXISTS(SELECT 1 FROM users WHERE phone_number = #{phoneNumber})
+  </select>
 </mapper>

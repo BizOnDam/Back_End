@@ -9,4 +9,5 @@ public interface EmailAuthMapper {
   EmailAuth findByEmailAndCode(@Param("email") String email, @Param("code") String code);
   void deleteByEmail(@Param("email") String email);
   void insertEmailAuth(EmailAuth emailAuth);
+  boolean existsByEmail(@Param("email") String email);
 }

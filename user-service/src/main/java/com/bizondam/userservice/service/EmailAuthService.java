@@ -18,6 +18,12 @@ public class EmailAuthService {
   private final MailService mailService;
 
   public void createAndSendAuthCode(String email) {
+    // 0. users 테이블에 이메일 존재 여부 확인
+    if (emailAuthMapper.existsByEmail(email)) {
+      log.warn("이메일 인증 요청 실패 - 이미 가입된 이메일 (email: {})", email);
+      throw new IllegalArgumentException("이미 가입된 이메일입니다.");
+    }
+
     // 1. 기존 인증 정보 삭제
     emailAuthMapper.deleteByEmail(email);
 
