@@ -21,6 +21,10 @@ public class UserService {
   private final UserMapper userMapper;
 
   public SignUpResponse registerUser(SignUpRequest signupRequest) {
+    // 0) 휴대폰 번호 중복 검사
+    if (userMapper.existsByPhoneNumber(signupRequest.getPhoneNumber())) {
+      throw new IllegalArgumentException("이미 가입된 휴대폰 번호입니다.");
+    }
     // 1) 비밀번호 암호화
     String encodedPwd = passwordEncoder.encode(signupRequest.getLoginPwd());
 
