@@ -7,8 +7,11 @@ dependencies {
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	implementation project(':common')
 
-	//DB
+	// DB
 	implementation "org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.4"
 	implementation 'org.springframework.boot:spring-boot-starter-jdbc'
 	runtimeOnly 'com.mysql:mysql-connector-j'
+
+	// 서킷 브레이커
+	implementation 'org.springframework.cloud:spring-cloud-starter-circuitbreaker-reactor-resilience4j'
 }

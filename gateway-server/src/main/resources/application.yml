@@ -5,93 +5,9 @@ spring:
   application:
     name: gateway-server
   profiles:
-    active: dev
+    active: main
   config:
     import: optional:configserver:http://admin:1234@localhost:8888
-
-  cloud:
-    gateway:
-      default-filters:
-        - JwtAuthenticationFilter
-      discovery:
-        locator:
-          enabled: false
-      routes:
-        # --- company-service API ---
-        - id: company-api
-          uri: lb://company-service
-          predicates:
-            - Path=/company-service/api/companies/**
-          filters:
-            - RewritePath=/company-service/api/companies/(?<segment>.*), /api/companies/${segment}
-        # --- company-service Swagger Docs ---
-        - id: company-swagger-docs
-          uri: lb://company-service
-          predicates:
-            - Path=/company-service/v3/api-docs
-          filters:
-            - RewritePath=/company-service/v3/api-docs, /v3/api-docs
-
-        # --- user-service API ---
-        - id: user-api
-          uri: lb://user-service
-          predicates:
-            - Path=/user-service/api/users/**
-          filters:
-            - RewritePath=/user-service/api/users/(?<segment>.*), /api/users/${segment}
-        # --- user-service Swagger Docs ---
-        - id: user-swagger-docs
-          uri: lb://user-service
-          predicates:
-            - Path=/user-service/v3/api-docs
-          filters:
-            - RewritePath=/user-service/v3/api-docs, /v3/api-docs
-
-        # --- estimate-service API ---
-        - id: estimate-api
-          uri: lb://estimate-service
-          predicates:
-            - Path=/estimate-service/api/estimates/**
-          filters:
-            - RewritePath=/estimate-service/api/estimates/(?<segment>.*), /api/estimates/${segment}
-        # --- estimate-service Swagger Docs ---
-        - id: estimate-swagger-docs
-          uri: lb://estimate-service
-          predicates:
-            - Path=/estimate-service/v3/api-docs
-          filters:
-            - RewritePath=/estimate-service/v3/api-docs, /v3/api-docs
-
-        # --- matching-service API ---
-        - id: matching-api
-          uri: lb://matching-service
-          predicates:
-            - Path=/matching-service/api/recommend/**
-          filters:
-            - RewritePath=/matching-service/api/recommend/(?<segment>.*), /api/recommend/${segment}
-        # --- matching-service Swagger Docs ---
-        - id: matching-swagger-docs
-          uri: lb://matching-service
-          predicates:
-            - Path=/matching-service/v3/api-docs
-          filters:
-            - RewritePath=/matching-service/v3/api-docs, /v3/api-docs
-
-      globalcors:
-        corsConfigurations:
-          '[/**]':
-            allowedOrigins:
-              - "http://localhost:8080"
-              - "http://14.63.178.155:8080"
-            allowedMethods:
-              - GET
-              - POST
-              - PUT
-              - DELETE
-              - PATCH
-              - OPTIONS
-            allowedHeaders: "*"
-            allowCredentials: true
 
 springdoc:
   enable-native-support: true
@@ -110,3 +26,21 @@ springdoc:
         url: /estimate-service/v3/api-docs
       - name: matching-service
         url: /matching-service/v3/api-docs
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      main:
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 3
+        slidingWindowSize: 10
+    instances:
+      companyCircuitBreaker:
+        baseConfig: main
+      matchingCircuitBreaker:
+        baseConfig: main
+  timelimiter:
+    configs:
+      main:
+        timeoutDuration: 5s
