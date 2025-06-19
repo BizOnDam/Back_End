@@ -29,7 +29,7 @@ public class CorsConfig {
     configuration.setExposedHeaders(List.of("Authorization"));
     // gateway 요청 허용
     configuration.setAllowedOrigins(Arrays.asList(
-            "http://localhost:5173",
+//            "http://localhost:5173",
         "http://localhost:8080",
         "http://14.63.178.155:8080",
         "http://14.63.178.155:8081",
