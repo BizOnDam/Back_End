@@ -12,6 +12,11 @@ spring:
     active: dev
   config:
     import: optional:configserver:http://admin:1234@localhost:8888
+  cloud:
+    circuitbreaker:
+      resilience4j:
+        enabled: true
+
 mybatis:
   mapper-locations: classpath:mybatis/mapper/*.xml
   type-aliases-package: com.bizondam.company_service.entity

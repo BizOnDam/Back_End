@@ -33,7 +33,8 @@ public class CompanyService {
             .b_nm(dto.getCompanyNameKr())
             .build();
 
-        boolean validBusinessNumber = nationalTaxClient.verify(vDto);
+        CompanyValidateResultResponse feignResponse = nationalTaxClient.validateBusiness(vDto);
+        boolean validBusinessNumber = feignResponse.isValidBusinessNumber();
 
         // 2) 이미 등록된 회사인지 체크
         Company existing = companyMapper.selectByBusinessNumber(dto.getBusinessNumber());

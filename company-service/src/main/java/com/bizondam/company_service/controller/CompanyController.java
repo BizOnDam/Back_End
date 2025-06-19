@@ -30,21 +30,9 @@ public class CompanyController {
 
     @Operation(summary = "사업자 등록 번호 검증 API", description = "사업자 등록 번호 검증 및 기업 가입 여부 확인 API")
     @PostMapping("/validate")
-    public ResponseEntity<CompanyValidateResultResponse> validateBusiness(@Valid @RequestBody CompanyValidationRequest dto) {
-        CompanyRequest companyRequest = mapToCompanyRequest(dto);
-        CompanyValidateResultResponse response = companyService.validateBusiness(companyRequest);
+    public ResponseEntity<CompanyValidateResultResponse> validateBusiness(
+        @Valid @RequestBody CompanyValidationRequest dto) {
+        CompanyValidateResultResponse response = nationalTaxClient.validateBusiness(dto);
         return ResponseEntity.ok(response);
-    }
-
-    private CompanyRequest mapToCompanyRequest(CompanyValidationRequest validationRequest) {
-        if (validationRequest == null) {
-            throw new IllegalArgumentException("요청 데이터가 null입니다.");
-        }
-        return CompanyRequest.builder()
-            .businessNumber(validationRequest.getB_no())
-            .startDate(validationRequest.getStart_dt())
-            .ceoNameKr(validationRequest.getP_nm())
-            .companyNameKr(validationRequest.getB_nm())
-            .build();
     }
 }
