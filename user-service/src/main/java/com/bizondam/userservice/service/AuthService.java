@@ -43,14 +43,11 @@ public class AuthService {
     if (user == null || !passwordEncoder.matches(loginPwd, user.getLoginPwd())) {
       throw new CustomException(AuthErrorCode.LOGIN_FAIL);
     }
-    if (!Boolean.TRUE.equals(user.getIsVerified())) {
-      throw new CustomException(AuthErrorCode.USER_INFO_FAIL);
-    }
     return issueTokens(user);
   }
 
   // 리프레시 토큰 재발급(토큰 로테이션)
-  public LoginResponse reissueTokens(Long userId, String refreshToken) {
+  public LoginResponse reissueRefreshTokens(Long userId, String refreshToken) {
     // 1. 리프레시 토큰 유효성 검증
     if (!validateRefreshToken(userId, refreshToken)) {
       throw new CustomException(AuthErrorCode.REFRESH_TOKEN_REQUIRED);
@@ -62,6 +59,18 @@ public class AuthService {
     }
     // 3. 새 토큰 발급 및 저장(기존 refreshToken 무효화)
     return issueTokens(user);
+  }
+
+  // 액세스 토큰만 재발급 (리프레시 토큰은 기존 것 사용)
+  public LoginResponse reissueAccessToken(Long userId, String refreshToken) {
+    if (!validateRefreshToken(userId, refreshToken)) {
+      throw new CustomException(AuthErrorCode.REFRESH_TOKEN_REQUIRED);
+    }
+    User user = authMapper.findByUserId(userId);
+    if (user == null) {
+      throw new CustomException(AuthErrorCode.USER_INFO_FAIL);
+    }
+    return issueAccessToken(user, refreshToken);
   }
 
   // 리프레시 토큰 유효성 검증
@@ -98,13 +107,42 @@ public class AuthService {
     LocalDateTime expiresAt = LocalDateTime.now().plusSeconds(jwtProvider.getRefreshTokenExpireTime() / 1000);
 
     // DB에 RefreshToken 저장(기존 값 덮어쓰기)
-    refreshTokenMapper.insertOrUpdateRefreshToken(
-        user.getUserId(),
-        refreshTokenId,
-        refreshToken,
-        expiresAt
-    );
+    try {
+      refreshTokenMapper.insertOrUpdateRefreshToken(
+          user.getUserId(),
+          refreshTokenId,
+          refreshToken,
+          expiresAt
+      );
+    } catch (Exception e) {
+      // 토큰 저장 실패 시 TOKEN_FAIL 예외 처리
+      throw new CustomException(AuthErrorCode.TOKEN_FAIL);
+    }
 
+    long expirationTime = System.currentTimeMillis() + jwtProvider.getAccessTokenExpireTime();
+
+    return LoginResponse.builder()
+        .accessToken(accessToken)
+        .refreshToken(refreshToken)
+        .userId(user.getUserId())
+        .loginId(user.getLoginId())
+        .username(user.getNameKr())
+        .roleInCompany(user.getRoleInCompany())
+        .companyId(String.valueOf(user.getCompanyId()))
+        .companyNameKr(companyNameKr)
+        .expirationTime(expirationTime)
+        .build();
+  }
+
+  private LoginResponse issueAccessToken(User user, String refreshToken) {
+    Company company = companyMapper.findByCompanyId(user.getCompanyId());
+    String companyNameKr = (company != null) ? company.getCompanyNameKr() : null;
+
+    Map<String, Object> claims = new HashMap<>();
+    claims.put("userId", user.getUserId());
+    claims.put("role", user.getRoleInCompany().name());
+
+    String accessToken = jwtProvider.createAccessToken(user.getLoginId(), claims);
     long expirationTime = System.currentTimeMillis() + jwtProvider.getAccessTokenExpireTime();
 
     return LoginResponse.builder()

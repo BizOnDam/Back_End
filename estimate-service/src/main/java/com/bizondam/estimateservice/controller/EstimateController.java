@@ -59,5 +59,4 @@ public class EstimateController {
     estimateService.rejectBySupplier(requestId, supplierUserId);
     return ResponseEntity.ok().build();
   }
-
 }
