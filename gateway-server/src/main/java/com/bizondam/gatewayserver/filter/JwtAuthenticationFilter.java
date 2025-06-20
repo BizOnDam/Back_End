@@ -37,8 +37,14 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
   @Override
   public GatewayFilter apply(Config config) {
     return (exchange, chain) -> {
+      // 0. OPTIONS 요청은 필터 통과 (CORS preflight 허용)
+      if (exchange.getRequest().getMethod().name().equals("OPTIONS")) {
+        return chain.filter(exchange);
+      }
+
       // 1. 인증이 필요 없는 경로는 바로 통과
       if (!routeValidator.isSecured.test(exchange.getRequest())) {
+        log.warn("인증 제외 경로로 감지됨: {}", exchange.getRequest().getURI().getPath());
         return chain.filter(exchange);
       }
 

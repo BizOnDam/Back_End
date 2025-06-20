@@ -1,39 +1,46 @@
-package com.bizondam.common.config;
+package com.bizondam.userservice.config;
 
-import lombok.RequiredArgsConstructor;
+import com.bizondam.common.config.CommonSecurityConfig;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
-@RequiredArgsConstructor
+@EnableWebSecurity
 public class SecurityConfig {
-
-  private final CorsConfig corsConfig;
 
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    CommonSecurityConfig.applyCommon(http);
+
     http
-        .csrf(AbstractHttpConfigurer::disable)
-        .cors(cors -> cors.configurationSource(corsConfig.corsConfigurationSource()))
-        // Swagger 관련 엔드포인트는 가장 먼저 허용
         .authorizeHttpRequests(auth -> auth
             .requestMatchers(
+                "/api/auth/login",
+                "/api/auth/refresh-token",
+                "/api/users/register",
+                "/api/users/check-login-id",
+                "/api/users/email-auth",
+                "/api/users/email-auth/verify",
+                // Swagger/OpenAPI 관련 경로
                 "/swagger-ui.html",
                 "/swagger-ui/**",
                 "/v3/api-docs/**",
                 "/swagger-resources/**",
                 "/webjars/**",
-                "/favicon.ico"
+                "/favicon.ico",
+                // 각 서비스별로 프록시되는 경로
+                "/user-service/v3/api-docs",
+                "/company-service/v3/api-docs",
+                "/estimate-service/v3/api-docs",
+                "/matching-service/v3/api-docs"
             ).permitAll()
-            // 그 외 API 엔드포인트 (당장은 모두 허용, 나중에 authenticated() 로 변경)
-            .requestMatchers(HttpMethod.OPTIONS,"/**").permitAll()
-            // 그 외 나머지는 인증 처리 (필요시)
+            .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
             .anyRequest().permitAll()
         );
     return http.build();
