@@ -2,12 +2,14 @@ package com.bizondam.estimateservice.config;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
+import com.bizondam.estimateservice.security.CustomUserHeaderAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -29,7 +31,9 @@ public class SecurityConfig {
             ).permitAll()
             .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
             .anyRequest().authenticated()
-        );
+        )
+            .addFilterBefore(new CustomUserHeaderAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
+            .cors(withDefaults());
 
     return http.build();
   }

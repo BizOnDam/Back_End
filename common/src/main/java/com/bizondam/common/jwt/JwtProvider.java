@@ -30,11 +30,14 @@ public class JwtProvider {
     this.secretKey = Keys.hmacShaKeyFor(keyBytes);
     this.accessTokenExpireTime = accessTokenExpireTime;
     this.refreshTokenExpireTime = refreshTokenExpireTime;
+    log.error("secretKey(raw): {}", secretKeyString);
+    log.error("secretKey(decoded): {}", Base64.getDecoder().decode(secretKeyString));
   }
 
   // AccessToken 생성
   public String createAccessToken(String subject, Map<String, Object> claims) {
     Date now = new Date();
+    log.warn("AccessToken 생성: 서명에 사용된 키 = {}", Base64.getEncoder().encodeToString(secretKey.getEncoded()));
     return Jwts.builder()
         .setClaims(claims)
         .setSubject(subject)

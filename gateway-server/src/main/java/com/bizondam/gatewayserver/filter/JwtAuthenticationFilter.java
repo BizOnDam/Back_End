@@ -64,13 +64,16 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
       String token = authHeader.substring(7);
 
       // 3. JWT 토큰 검증 및 claims 추출 (블로킹 코드이므로 별도 스레드에서 실행)
-      return Mono.fromCallable(() -> jwtProvider.getClaims(token))
-          .subscribeOn(Schedulers.boundedElastic())
+      return Mono.fromCallable(() -> {
+                log.info("토큰 파싱 시도: {}", token);
+                return jwtProvider.getClaims(token);
+              })
+              .subscribeOn(Schedulers.boundedElastic())
           .flatMap(claims -> {
             // 4. Downstream 서비스로 claims(예: userId, role) 전달
             // - 헤더에 추가하여 마이크로서비스 간 사용자 정보 전달
             ServerHttpRequest mutatedRequest = exchange.getRequest().mutate()
-                .header("X-User-Id", claims.get("userId", String.class))
+                .header("X-User-Id", String.valueOf(claims.get("userId", Object.class)))
                 .header("X-User-Role", claims.get("role", String.class))
                 .build();
             log.info("PROXY to => {}", mutatedRequest.getURI());
@@ -78,6 +81,7 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
             return chain.filter(exchange.mutate().request(mutatedRequest).build());
           })
           .onErrorResume(e -> {
+            log.error("토큰 파싱 실패", e);
             // 5. 예외 발생 시 커스텀 예외 메시지와 상태 코드 반환
             if (e instanceof CustomException) {
               CustomException ce = (CustomException) e;
