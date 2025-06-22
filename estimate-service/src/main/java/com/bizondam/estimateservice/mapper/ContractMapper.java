@@ -2,10 +2,12 @@ package com.bizondam.estimateservice.mapper;
 
 import com.bizondam.estimateservice.dto.ContractCreateDto;
 import com.bizondam.estimateservice.dto.ContractDto;
+import com.bizondam.estimateservice.dto.ContractHistoryDto;
 import com.bizondam.estimateservice.dto.ContractItemDto;
+
 import java.util.List;
 
-import com.bizondam.estimateservice.dto.ContractListResponse;
+import com.bizondam.estimateservice.dto.ContractListResponseDto;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -33,9 +35,13 @@ public interface ContractMapper {
   List<ContractDto> selectContractsBySupplierCompany(@Param("companyId") Long companyId);
 
   // 계약 리스트 - 수요 기업용
-  List<ContractListResponse> findContractsByBuyer(@Param("companyId") Long companyId, @Param("userId") Long userId);
+  List<ContractListResponseDto> findContractsByBuyer(@Param("companyId") Long companyId, @Param("userId") Long userId);
+  List<ContractDto> selectContractsByBuyerCompanyAndUser(@Param("companyId") Long companyId, @Param("userId") Long userId);
 
   // 계약 리스트 - 공급 기업용
-  List<ContractListResponse> findContractsBySupplier(@Param("companyId") Long companyId, @Param("userId") Long userId);
+  List<ContractListResponseDto> findContractsBySupplier(@Param("companyId") Long companyId, @Param("userId") Long userId);
+  List<ContractDto> selectContractsBySupplierCompanyAndUser(@Param("companyId") Long companyId, @Param("userId") Long userId);
 
+  // 거래 이력 조회
+  List<ContractHistoryDto> selectContractHistoryByCompanyId(@Param("companyId") Long companyId);
 }

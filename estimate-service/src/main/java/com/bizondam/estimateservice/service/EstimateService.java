@@ -24,18 +24,23 @@ public class EstimateService {
 
   // 1) 견적 요청서 생성
   @Transactional
-  public Long createEstimate(EstimateRequestCreateDto dto) {
-    // 헤더 INSERT (requestId 자동 생성)
+  public List<EstimateRequestItem> createEstimateAndReturnItems(EstimateRequestCreateDto dto) {
     requestMapper.insertEstimateRequest(dto);
-    Long requestId = dto.getRequestId(); // useGeneratedKeys로 자동 세팅됨
+    Long requestId = dto.getRequestId();
 
-    // 아이템 INSERT
+    List<EstimateRequestItem> itemList = new ArrayList<>();
     if (dto.getItems() != null) {
-      dto.getItems().forEach(item ->
-          requestMapper.insertEstimateRequestItem(requestId, item)
-      );
+      for (EstimateRequestItemDto itemDto : dto.getItems()) {
+        EstimateRequestItem item = new EstimateRequestItem();
+        item.setRequestId(requestId);
+        item.setProductId(itemDto.getProductId());
+        item.setSpecification(itemDto.getSpecification());
+        item.setQuantity(itemDto.getQuantity());
+        requestMapper.insertEstimateRequestItemWithReturnId(item); // itemId 자동 할당
+        itemList.add(item);
+      }
     }
-    return requestId;
+    return itemList;
   }
 
   // 2) 수요 업체에서 공급 업체 지정
@@ -92,7 +97,6 @@ public class EstimateService {
     contractMapper.insertContract(contract);
   }
 
-
   // 5) 계약 미체결 - 수요 업체가 거절한 경우
   @Transactional
   public void rejectByBuyer(Long requestId) {
@@ -132,24 +136,5 @@ public class EstimateService {
       responseId = newResponse.getResponseId();
       responseMapper.updateResponseStatus(responseId, 4); // 상태 4로 변경
     }
-  }
-
-  public List<EstimateRequestItem> createEstimateAndReturnItems(EstimateRequestCreateDto dto) {
-    requestMapper.insertEstimateRequest(dto);
-    Long requestId = dto.getRequestId();
-
-    List<EstimateRequestItem> itemList = new ArrayList<>();
-    if (dto.getItems() != null) {
-      for (EstimateRequestItemDto itemDto : dto.getItems()) {
-        EstimateRequestItem item = new EstimateRequestItem();
-        item.setRequestId(requestId);
-        item.setProductId(itemDto.getProductId());
-        item.setSpecification(itemDto.getSpecification());
-        item.setQuantity(itemDto.getQuantity());
-        requestMapper.insertEstimateRequestItemWithReturnId(item); // itemId 자동 할당
-        itemList.add(item);
-      }
-    }
-    return itemList;
   }
 }

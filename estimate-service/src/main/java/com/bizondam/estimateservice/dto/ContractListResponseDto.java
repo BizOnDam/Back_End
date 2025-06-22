@@ -11,7 +11,7 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class ContractListResponse {
+public class ContractListResponseDto {
     private Long contractId;
     private Long requestId;
     private Long responseId;

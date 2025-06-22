@@ -55,7 +55,7 @@ public class EstimateController {
 
   @Operation(summary = "계약 미체결 - 공급 업체용", description = "공급 업체에서 계약을 거절한 경우.")
   @PutMapping("/reject-supplier/{requestId}")
-  public ResponseEntity<?> rejectBySupplier(@PathVariable Long requestId, @RequestParam Long supplierUserId) {
+  public ResponseEntity<BaseResponse<Boolean>> rejectBySupplier(@PathVariable Long requestId, @RequestParam Long supplierUserId) {
     estimateService.rejectBySupplier(requestId, supplierUserId);
     return ResponseEntity.ok().build();
   }

@@ -2,14 +2,15 @@ package com.bizondam.estimateservice.service;
 
 import com.bizondam.common.exception.CustomException;
 import com.bizondam.estimateservice.dto.ContractDto;
+import com.bizondam.estimateservice.dto.ContractHistoryDto;
 import com.bizondam.estimateservice.dto.ContractItemDto;
-import com.bizondam.estimateservice.dto.ContractListResponse;
+import com.bizondam.estimateservice.dto.ContractListResponseDto;
 import com.bizondam.estimateservice.exception.EstimateErrorCode;
 import com.bizondam.estimateservice.mapper.ContractMapper;
 
+import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
@@ -43,77 +44,89 @@ public class ContractService {
     return dto;
   }
 
-  public List<ContractDto> getRequestsForBuyer(Long companyId) {
-    List<ContractDto> list = contractMapper.selectContractsByBuyerCompany(companyId);
-    // items 채우기
-    for (ContractDto dto : list) {
-      List<ContractItemDto> items = contractMapper.findContractItemsByRequestIdAndResponseId(
-              dto.getRequestId(), dto.getResponseId()
-      );
-      dto.setItems(items);
-    }
-    return list;
-  }
-
-  public List<ContractDto> getRequestsForSupplier(Long companyId) {
-    List<ContractDto> list = contractMapper.selectContractsBySupplierCompany(companyId);
-    // items 채우기
-    for (ContractDto dto : list) {
-      List<ContractItemDto> items = contractMapper.findContractItemsByRequestIdAndResponseId(
-              dto.getRequestId(), dto.getResponseId()
-      );
-      dto.setItems(items);
-    }
-    return list;
-  }
-
-
-  public List<ContractListResponse> getContractList(Long userId, Long companyId, String role, String date) {
-    List<ContractListResponse> contracts;
-
-    System.err.println("입력값: userId=" + userId + ", companyId=" + companyId + ", role=" + role + ", date=" + date);
-
-    if ("BUYER".equalsIgnoreCase(role)) {
-      contracts = contractMapper.findContractsByBuyer(companyId, userId);
-      System.err.println("BUYER용 계약 개수: " + contracts.size());
+  // 수요 업체용
+  public List<ContractDto> getRequestsForBuyer(Long companyId, String userRole, Long userId) {
+    List<ContractDto> list;
+    if ("CEO".equalsIgnoreCase(userRole)) {
+      // 회사의 모든 요청서
+      list = contractMapper.selectContractsByBuyerCompany(companyId);
     } else {
-      contracts = contractMapper.findContractsBySupplier(companyId, userId);
-      System.err.println("SUPPLIER용 계약 개수: " + contracts.size());
+      // STAFF: 본인이 생성한 요청서만
+      list = contractMapper.selectContractsByBuyerCompanyAndUser(companyId, userId);
+    }
+    for (ContractDto dto : list) {
+      List<ContractItemDto> items = contractMapper.findContractItemsByRequestIdAndResponseId(
+          dto.getRequestId(), dto.getResponseId()
+      );
+      dto.setItems(items);
+    }
+    return list;
+  }
+
+  // 공급 업체용
+  public List<ContractDto> getRequestsForSupplier(Long companyId, String userRole, Long userId) {
+    List<ContractDto> list;
+    if ("CEO".equalsIgnoreCase(userRole)) {
+      // 회사의 모든 할당 요청서
+      list = contractMapper.selectContractsBySupplierCompany(companyId);
+    } else {
+      // STAFF: 본인이 응답한 요청서만
+      list = contractMapper.selectContractsBySupplierCompanyAndUser(companyId, userId);
+    }
+    for (ContractDto dto : list) {
+      List<ContractItemDto> items = contractMapper.findContractItemsByRequestIdAndResponseId(
+          dto.getRequestId(), dto.getResponseId()
+      );
+      dto.setItems(items);
+    }
+    return list;
+  }
+
+  // 계약 리스트
+  public List<ContractListResponseDto> getContractList(
+      Long userId, Long companyId, String role, String userRole, LocalDate date) {
+
+    List<ContractListResponseDto> contracts;
+
+    // CEO: 회사의 모든 계약
+    if ("CEO".equalsIgnoreCase(userRole)) {
+      if ("BUYER".equalsIgnoreCase(role)) {
+        contracts = contractMapper.findContractsByBuyer(companyId, null); // userId null
+      } else {
+        contracts = contractMapper.findContractsBySupplier(companyId, null); // userId null
+      }
+    }
+    // STAFF: 본인이 요청/응답한 계약만
+    else {
+      if ("BUYER".equalsIgnoreCase(role)) {
+        contracts = contractMapper.findContractsByBuyer(companyId, userId); // userId 필터
+      } else {
+        contracts = contractMapper.findContractsBySupplier(companyId, userId); // userId 필터
+      }
     }
 
-    for (ContractListResponse dto : contracts) {
-      System.err.println("계약 ID: " + dto.getContractId()
-              + " | 요청 ID: " + dto.getRequestId()
-              + " | 응답 ID: " + dto.getResponseId()
-              + " | 계약일자: " + dto.getContractDate()
-              + " | 납품기한: " + dto.getDueDate());
-
+    // 이하 품목 및 날짜 필터링 로직 동일
+    for (ContractListResponseDto dto : contracts) {
       List<ContractItemDto> items = contractMapper.findContractItemsByRequestIdAndResponseId(
-              dto.getRequestId(), dto.getResponseId());
-
-      System.err.println("품목 개수: " + items.size());
-      for (ContractItemDto item : items) {
-        System.err.println("품목명: " + item.getDetailCategoryName());
-      }
-
+          dto.getRequestId(), dto.getResponseId());
       List<String> itemNames = items.stream()
-              .map(ContractItemDto::getDetailCategoryName)
-              .collect(Collectors.toList());
-
+          .map(ContractItemDto::getDetailCategoryName)
+          .collect(Collectors.toList());
       dto.setItemNames(itemNames);
     }
 
-    List<ContractListResponse> filtered = contracts.stream()
-            .filter(dto -> {
-              if (date == null) return true;
-              boolean matches = date.equals(dto.getContractDate()) || date.equals(dto.getDueDate());
-              System.err.println("필터링 확인 - 계약ID: " + dto.getContractId() + ", 포함여부: " + matches);
-              return matches;
-            })
-            .sorted(Comparator.comparing(ContractListResponse::getContractDate).reversed())
-            .collect(Collectors.toList());
+    List<ContractListResponseDto> filtered = contracts.stream()
+        .filter(dto -> {
+          if (date == null) return true;
+          return date.equals(dto.getContractDate()) || date.equals(dto.getDueDate());
+        })
+        .sorted(Comparator.comparing(ContractListResponseDto::getContractDate).reversed())
+        .collect(Collectors.toList());
 
-    System.err.println("최종 반환 개수: " + filtered.size());
     return filtered;
+  }
+
+  public List<ContractHistoryDto> getContractHistoryByCompanyId(Long companyId) {
+    return contractMapper.selectContractHistoryByCompanyId(companyId);
   }
 }
