@@ -4,7 +4,7 @@
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.bizondam.estimateservice.mapper.ContractMapper">
-
+  <!-- 계약 생성 -->
   <insert id="insertContract" parameterType="ContractCreateDto" useGeneratedKeys="true" keyProperty="contractId">
     INSERT INTO contracts (
       response_id, buyer_company_id, supplier_company_id,
@@ -45,17 +45,16 @@
       c.contract_id         AS contract_id,
       c.created_at          AS contract_created_at      -- 계약 체결일
 
-    FROM contracts c
-           JOIN estimate_response   resp ON c.response_id = resp.response_id
+    FROM estimate_response resp
            JOIN estimate_request    er ON resp.request_id = er.request_id
+           LEFT JOIN contracts      c ON c.response_id = resp.response_id
            JOIN companies           cb ON er.buyer_company_id = cb.company_id
            JOIN companies           cs ON er.supplier_company_id = cs.company_id
-           JOIN users               bu ON c.buyer_user_id = bu.user_id
-           JOIN users               su ON c.supplier_user_id = su.user_id
+           LEFT JOIN users          bu ON c.buyer_user_id = bu.user_id
+           LEFT JOIN users su       ON c.supplier_user_id = su.user_id
     WHERE er.request_id = #{requestId}
       AND resp.response_id = #{responseId}
   </select>
-
 
   <!-- 품목 리스트 조회 -->
   <select id="findContractItemsByRequestIdAndResponseId" resultMap="ContractItemResultMap" parameterType="map">
@@ -183,8 +182,8 @@
     ORDER BY er.created_at DESC
   </select>
 
-<!--  BUYER인 경우 계약서 조회-->
-  <select id="findContractsByBuyer" resultType="com.bizondam.estimateservice.dto.ContractListResponse">
+<!--  BUYER인 경우 계약(견적 요청서) 조회-->
+  <select id="findContractsByBuyer" resultType="ContractListResponseDto">
     SELECT
       c.contract_id          AS contractId,
       q.request_id           AS requestId,
@@ -200,8 +199,8 @@
       AND c.buyer_user_id = #{userId}
   </select>
 
-  <!--  SUPPLIER인 경우 계약서 조회-->
-  <select id="findContractsBySupplier" resultType="ContractListResponse" parameterType="map">
+  <!--  SUPPLIER인 경우 계약서(견적 요청 응답) 조회-->
+  <select id="findContractsBySupplier" resultType="ContractListResponseDto" parameterType="map">
     SELECT
       c.contract_id          AS contractId,
       q.request_id           AS requestId,
@@ -244,7 +243,6 @@
   </resultMap>
 
   <resultMap id="ContractItemResultMap" type="ContractItemDto">
-<!--    <id     property="itemId" column="item_id"/>-->
     <id     property="itemId"               column="item_item_id"/>
     <result property="requestId"            column="item_request_id"/>
     <result property="productId"            column="item_product_id"/>
@@ -259,4 +257,42 @@
     <result property="unitPrice"            column="resp_item_unit_price"/>
     <result property="deliveryDays"         column="resp_item_delivery_days"/>
   </resultMap>
+
+  <!-- 거래 이력 조회 -->
+  <select id="selectContractHistoryByCompanyId" resultType="ContractHistoryDto">
+    SELECT
+      CASE
+        WHEN er.status = 3 THEN c.contract_id
+        WHEN er.status = 4 THEN er.request_id
+        ELSE NULL
+        END AS contractId,
+
+      er.detail AS details,
+
+      CASE
+        WHEN er.status = 3 THEN c.created_at
+        WHEN er.status = 4 THEN er.created_at
+        ELSE NULL
+        END AS contractDate,
+
+      CASE
+        WHEN er.status = 3 THEN eresp.total_price
+        WHEN er.status = 4 AND er.response_id IS NOT NULL THEN eresp.total_price
+        ELSE NULL
+        END AS totalPrice,
+
+      CASE
+        WHEN er.status = 3 AND c.status = 1 THEN '2'    -- 계약 중
+        WHEN er.status = 3 AND c.status = 2 THEN '3'    -- 계약 완료
+        WHEN er.status = 4 THEN '1'                     -- 미체결
+        ELSE NULL
+        END AS status
+
+    FROM estimate_request er
+           LEFT JOIN estimate_response eresp ON er.response_id = eresp.response_id
+           LEFT JOIN contracts c ON c.request_id = er.request_id
+    WHERE er.company_id = #{companyId}
+      AND (er.status = 3 OR er.status = 4)
+    ORDER BY COALESCE(c.created_at, er.created_at) DESC
+  </select>
 </mapper>
