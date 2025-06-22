@@ -37,6 +37,13 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
   @Override
   public GatewayFilter apply(Config config) {
     return (exchange, chain) -> {
+      ServerHttpRequest request = exchange.getRequest();
+      log.info("=== [Gateway Filter] Incoming Request ===");
+      log.info("  RawPath: {}", request.getURI().getRawPath());
+      log.info("  Path: {}", request.getPath());
+      log.info("  Full URI: {}", request.getURI());
+      log.info("  Headers: {}", request.getHeaders());
+
       // 0. OPTIONS 요청은 필터 통과 (CORS preflight 허용)
       if (exchange.getRequest().getMethod().name().equals("OPTIONS")) {
         return chain.filter(exchange);
@@ -66,6 +73,7 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
                 .header("X-User-Id", claims.get("userId", String.class))
                 .header("X-User-Role", claims.get("role", String.class))
                 .build();
+            log.info("PROXY to => {}", mutatedRequest.getURI());
             // 변경된 요청을 포함한 exchange로 체인 계속 진행
             return chain.filter(exchange.mutate().request(mutatedRequest).build());
           })

@@ -10,12 +10,12 @@ import java.util.function.Predicate;
 @Component
 public class RouteValidator {
   public static final List<String> openApiEndpoints = List.of(
-      "/api/auth/login",
-      "/api/auth/refresh-token",
-      "/api/users/register",
-      "/api/users/check-login-id",
-      "/api/users/email-auth",
-      "/api/users/email-auth/verify",
+      "/user-service/api/auth/login",
+      "/user-service/api/auth/refresh-token",
+      "/user-service/api/users/register",
+      "/user-service/api/users/check-login-id",
+      "/user-service/api/users/email-auth",
+      "/user-service/api/users/email-auth/verify",
       // Swagger/OpenAPI 관련 경로
       "/swagger-ui.html",
       "/swagger-ui/",
@@ -30,7 +30,6 @@ public class RouteValidator {
       "/webjars/",
       "/webjars/**",
       "/favicon.ico",
-      // 각 서비스별로 프록시되는 경로
       "/user-service/v3/api-docs",
       "/company-service/v3/api-docs",
       "/estimate-service/v3/api-docs",
@@ -39,5 +38,5 @@ public class RouteValidator {
 
   public Predicate<ServerHttpRequest> isSecured =
       request -> openApiEndpoints.stream()
-          .noneMatch(uri -> request.getURI().getPath().contains(uri));
+          .noneMatch(uri -> request.getURI().getPath().startsWith(uri));
 }
