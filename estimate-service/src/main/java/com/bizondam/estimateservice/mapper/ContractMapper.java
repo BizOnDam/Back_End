@@ -25,7 +25,7 @@ public interface ContractMapper {
   // requestId를 이용한 견적 조회
   ContractDto findContractByRequestIdOnly(@Param("requestId") Long requestId);
 
-  // requestId를 이용한 견적 item조회
+  // requestId를 이용한 견적 item 조회
   List<ContractItemDto> findContractItemsByRequestIdOnly(@Param("requestId") Long requestId);
 
   // 수요 기업용 리스트
