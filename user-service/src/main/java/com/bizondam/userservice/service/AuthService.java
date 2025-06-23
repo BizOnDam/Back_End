@@ -5,11 +5,14 @@ import com.bizondam.common.exception.CustomException;
 import com.bizondam.common.jwt.JwtProvider;
 import com.bizondam.userservice.dto.response.LoginResponse;
 import com.bizondam.userservice.entity.Company;
+import com.bizondam.userservice.entity.RefreshToken;
 import com.bizondam.userservice.entity.User;
 import com.bizondam.userservice.mapper.AuthMapper;
 import com.bizondam.userservice.mapper.CompanyMapper;
 import com.bizondam.userservice.mapper.RefreshTokenMapper;
+import io.jsonwebtoken.Claims;
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -66,18 +69,26 @@ public class AuthService {
     if (!validateRefreshToken(userId, refreshToken)) {
       throw new CustomException(AuthErrorCode.REFRESH_TOKEN_REQUIRED);
     }
+
     User user = authMapper.findByUserId(userId);
     if (user == null) {
       throw new CustomException(AuthErrorCode.USER_INFO_FAIL);
     }
+
     return issueAccessToken(user, refreshToken);
   }
 
-  // 리프레시 토큰 유효성 검증
+  // 리프레시 토큰 검증 로직
   public boolean validateRefreshToken(Long userId, String refreshToken) {
-    String tokenId = jwtProvider.extractTokenId(refreshToken);
-    String savedToken = refreshTokenMapper.findRefreshTokenByUserIdAndTokenId(userId, tokenId);
-    return savedToken != null && savedToken.equals(refreshToken);
+    Claims claims = jwtProvider.getClaimsIgnoreExpiration(refreshToken);
+    String tokenId = claims.getId();
+
+    RefreshToken token = refreshTokenMapper.findByUserIdAndTokenId(userId, tokenId)
+        .orElse(null);
+
+    if (token == null) return false;
+
+    return token.getExpiresAt().isAfter(LocalDateTime.now());
   }
 
   // 로그아웃(리프레시 토큰 폐기)

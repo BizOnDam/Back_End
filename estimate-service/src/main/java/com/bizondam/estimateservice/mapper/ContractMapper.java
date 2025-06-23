@@ -44,4 +44,11 @@ public interface ContractMapper {
 
   // 거래 이력 조회
   List<ContractHistoryDto> selectContractHistoryByCompanyId(@Param("companyId") Long companyId);
+
+  // 전체 거래 건수 조회
+  int countContractsByStatus(@Param("companyId") Long companyId, @Param("status") int status);
+  int countPendingEstimates(@Param("companyId") Long companyId);
+
+  // 거래 완료로 업데이트
+  int updateContractStatusToCompleted(@Param("contractId") Long contractId);
 }

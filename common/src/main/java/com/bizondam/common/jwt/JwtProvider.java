@@ -84,4 +84,18 @@ public class JwtProvider {
   public String extractTokenId(String token) {
     return getClaims(token).getId();
   }
+
+  // signature만 검증하는 메서드
+  public Claims getClaimsIgnoreExpiration(String token) {
+    try {
+      return Jwts.parserBuilder()
+          .setSigningKey(secretKey)
+          .build()
+          .parseClaimsJws(token)
+          .getBody();
+    } catch (ExpiredJwtException e) {
+      // signature는 유효했으니 claim은 꺼낼 수 있음
+      return e.getClaims();
+    }
+  }
 }

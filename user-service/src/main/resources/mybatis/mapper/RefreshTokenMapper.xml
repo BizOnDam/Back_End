@@ -3,27 +3,33 @@
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.bizondam.userservice.mapper.RefreshTokenMapper">
-
+  <!-- Insert or Update -->
   <insert id="insertOrUpdateRefreshToken">
     INSERT INTO refresh_tokens (user_id, token_id, refresh_token, expires_at)
     VALUES (#{userId}, #{tokenId}, #{refreshToken}, #{expiresAt})
       ON DUPLICATE KEY UPDATE
-                         token_id = #{tokenId},
-                         refresh_token = #{refreshToken},
-                         expires_at = #{expiresAt}
+                         refresh_token = VALUES(refresh_token),
+                         expires_at = VALUES(expires_at)
   </insert>
 
-  <select id="findRefreshTokenByUserIdAndTokenId" resultType="string">
-    SELECT refresh_token
+  <!-- 조회 : userId + tokenId 로 RefreshToken 엔티티 전체 가져오기 -->
+  <select id="findByUserIdAndTokenId"
+    parameterType="map"
+    resultType="com.bizondam.userservice.entity.RefreshToken">
+    SELECT
+      user_id,
+      token_id,
+      refresh_token,
+      expires_at
     FROM refresh_tokens
     WHERE user_id = #{userId}
       AND token_id = #{tokenId}
   </select>
 
+  <!-- 삭제 -->
   <delete id="deleteRefreshToken">
     DELETE FROM refresh_tokens
     WHERE user_id = #{userId}
       AND token_id = #{tokenId}
   </delete>
-
 </mapper>

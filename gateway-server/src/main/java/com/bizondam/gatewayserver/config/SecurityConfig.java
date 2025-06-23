@@ -18,7 +18,8 @@ public class SecurityConfig {
         .authorizeExchange(exchange -> exchange
             .pathMatchers(
                 "/api/auth/login",
-                "/api/auth/refresh-token",
+                "/api/auth/reissue-access-token",
+                "/api/auth/reissue-refresh-token",
                 "/api/users/register",
                 "/api/users/check-login-id",
                 "/api/users/email-auth",

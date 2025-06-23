@@ -4,7 +4,7 @@ import com.bizondam.common.exception.CustomException;
 import com.bizondam.common.response.BaseResponse;
 import com.bizondam.userservice.dto.request.LoginRequest;
 import com.bizondam.userservice.dto.request.LogoutRequest;
-import com.bizondam.userservice.dto.request.RefreshTokenRequest;
+import com.bizondam.userservice.entity.RefreshToken;
 import com.bizondam.userservice.dto.response.LoginResponse;
 import com.bizondam.userservice.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -58,7 +58,7 @@ public class AuthController {
 
   @Operation(summary = "refresh && access 토큰 재발급", description = "access, refresh 토큰 모두 재발급(refresh 토큰 만료 시)")
   @PostMapping("/reissue-refresh-token")
-  public ResponseEntity<BaseResponse<LoginResponse>> reissueRefreshToken(@RequestBody RefreshTokenRequest request) {
+  public ResponseEntity<BaseResponse<LoginResponse>> reissueRefreshToken(@RequestBody RefreshToken request) {
     try {
       boolean isValid = authService.validateRefreshToken(request.getUserId(), request.getRefreshToken());
       if (!isValid) {

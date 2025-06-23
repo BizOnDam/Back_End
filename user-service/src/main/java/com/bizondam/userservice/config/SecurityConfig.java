@@ -18,13 +18,13 @@ public class SecurityConfig {
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     http
-        .cors(withDefaults())
         .csrf(csrf -> csrf.disable())
         .authorizeHttpRequests(auth -> auth
             .requestMatchers(
                 "/api/auth/login",
                 "/api/auth/logout",
-                "/api/auth/refresh-token",
+                "/api/auth/reissue-access-token",
+                "/api/auth/reissue-refresh-token",
                 "/api/users/register",
                 "/api/users/check-login-id",
                 "/api/users/email-auth",
@@ -39,7 +39,6 @@ public class SecurityConfig {
             .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
             .anyRequest().authenticated()
         );
-
     return http.build();
   }
 
