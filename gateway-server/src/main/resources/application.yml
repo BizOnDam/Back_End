@@ -42,4 +42,7 @@ resilience4j:
   timelimiter:
     configs:
       main:
-        timeoutDuration: 5s
+        timeoutDuration: 60s
+    instances:
+      matchingCircuitBreaker:
+        baseConfig: main

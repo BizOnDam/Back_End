@@ -6,12 +6,17 @@ jasypt:
     password: ${ENCRYPTOR_PASSWORD}
 
 spring:
+  main:
+    allow-bean-definition-overriding: true
   application:
     name: matching-service
   profiles:
     active: dev
   config:
     import: optional:configserver:http://admin:1234@localhost:8888
+
+  jmx:
+    enabled: false # 로그 끄기
 
 mybatis:
   mapper-locations: classpath:mybatis/mapper/*.xml
@@ -25,3 +30,18 @@ springdoc:
     enabled: true
   swagger-ui:
     enabled: true
+
+logging:
+  level:
+    root: DEBUG
+    com.bizondam: DEBUG
+    sun.rmi: ERROR
+    javax.management.remote.rmi: ERROR
+    sun.rmi.transport.tcp: ERROR
+    sun.rmi.loader: ERROR
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health

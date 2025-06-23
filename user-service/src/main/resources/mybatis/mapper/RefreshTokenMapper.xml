@@ -8,6 +8,7 @@
     INSERT INTO refresh_tokens (user_id, token_id, refresh_token, expires_at)
     VALUES (#{userId}, #{tokenId}, #{refreshToken}, #{expiresAt})
       ON DUPLICATE KEY UPDATE
+                         token_id = #{tokenId},
                          refresh_token = #{refreshToken},
                          expires_at = #{expiresAt}
   </insert>
