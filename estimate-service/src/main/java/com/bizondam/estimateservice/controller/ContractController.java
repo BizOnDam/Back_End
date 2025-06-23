@@ -4,6 +4,7 @@ import com.bizondam.common.response.BaseResponse;
 import com.bizondam.estimateservice.dto.ContractDto;
 import com.bizondam.estimateservice.dto.ContractHistoryDto;
 import com.bizondam.estimateservice.dto.ContractListResponseDto;
+import com.bizondam.estimateservice.dto.TradeSummaryDto;
 import com.bizondam.estimateservice.service.ContractService;
 import io.swagger.v3.oas.annotations.Operation;
 import java.time.LocalDate;
@@ -99,5 +100,22 @@ public class ContractController {
       return ResponseEntity.ok(BaseResponse.success("리스트가 없습니다.", null));
     }
     return ResponseEntity.ok(BaseResponse.success("할당된 요청 리스트 조회", list));
+  }
+
+  // 대시보드
+  @Operation(summary = "전체 거래 현황", description = "전체 거래 건수, 진행 중인 계약, 완료된 계약, 대기 중인 견적")
+  @GetMapping("/summary")
+  public ResponseEntity<BaseResponse<TradeSummaryDto>> getTradeSummary(
+      @RequestParam Long companyId
+  ) {
+    TradeSummaryDto summary = contractService.getTradeSummary(companyId);
+    return ResponseEntity.ok(BaseResponse.success("전체 거래 현황 조회", summary));
+  }
+
+  @Operation(summary = "계약 완료 처리", description = "진행중인 계약 상태를 완료 상태로 변경")
+  @PatchMapping("/{contractId}/complete")
+  public ResponseEntity<BaseResponse<String>> completeContract(@PathVariable Long contractId) {
+    contractService.completeContract(contractId);
+    return ResponseEntity.ok(BaseResponse.success("계약이 완료 상태로 변경되었습니다.", null));
   }
 }

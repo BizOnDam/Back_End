@@ -5,6 +5,7 @@ import com.bizondam.estimateservice.dto.ContractDto;
 import com.bizondam.estimateservice.dto.ContractHistoryDto;
 import com.bizondam.estimateservice.dto.ContractItemDto;
 import com.bizondam.estimateservice.dto.ContractListResponseDto;
+import com.bizondam.estimateservice.dto.TradeSummaryDto;
 import com.bizondam.estimateservice.exception.EstimateErrorCode;
 import com.bizondam.estimateservice.mapper.ContractMapper;
 
@@ -128,5 +129,28 @@ public class ContractService {
 
   public List<ContractHistoryDto> getContractHistoryByCompanyId(Long companyId) {
     return contractMapper.selectContractHistoryByCompanyId(companyId);
+  }
+
+  // 전체 거래 현황 조회
+  public TradeSummaryDto getTradeSummary(Long companyId) {
+    int inProgress = contractMapper.countContractsByStatus(companyId, 1);
+    int completed = contractMapper.countContractsByStatus(companyId, 2);
+    int pendingEstimates = contractMapper.countPendingEstimates(companyId);
+
+    TradeSummaryDto dto = new TradeSummaryDto();
+    dto.setInProgressContracts(inProgress);
+    dto.setCompletedContracts(completed);
+    dto.setTotalContracts(inProgress + completed);
+    dto.setPendingEstimates(pendingEstimates);
+    return dto;
+  }
+
+  // 계약 완료
+  public void completeContract(Long contractId) {
+    int updatedRows = contractMapper.updateContractStatusToCompleted(contractId);
+    if (updatedRows == 0) {
+      // 업데이트 안되면 에러 발생: 이미 완료된 계약이거나 없는 ID
+      throw new CustomException(EstimateErrorCode.CONTRACT_NOT_FOUND_OR_ALREADY_COMPLETED);
+    }
   }
 }
