@@ -4,6 +4,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Map;
+
 @RestController
 public class FallbackController {
 
@@ -13,7 +15,13 @@ public class FallbackController {
   }
 
   @RequestMapping("/fallback/matching")
-  public ResponseEntity<String> matchingFallback() {
-    return ResponseEntity.ok("Matching Service is temporarily unavailable. Please try again later.");
+  public ResponseEntity<Map<String, Object>> matchingFallback() {
+    Map<String, Object> body = Map.of(
+            "success", false,
+            "code", 503,
+            "message", "Matching Service is temporarily unavailable. Please try again later.",
+            "data", null
+    );
+    return ResponseEntity.status(503).body(body);
   }
 }
