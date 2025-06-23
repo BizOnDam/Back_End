@@ -5,12 +5,14 @@ import com.bizondam.matching_service.dto.MatchingResultDto;
 import com.bizondam.matching_service.service.MatchingService;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @RestController
 @AllArgsConstructor
 @RequestMapping("/api/recommend")
@@ -20,8 +22,15 @@ public class RecommendationController {
 
     @GetMapping("/{requestId}")
     public ResponseEntity<BaseResponse<MatchingResultDto>> recommend(@PathVariable Long requestId) {
-        MatchingResultDto result = matchingService.syncRecommend(requestId);
-        return ResponseEntity.ok(BaseResponse.success("공급기업 추천 성공", result));
+        log.info("추천 시작 - requestId: {}", requestId);
+        try {
+            MatchingResultDto result = matchingService.syncRecommend(requestId);
+            log.info("추천 성공 - requestId: {}", requestId);
+            return ResponseEntity.ok(BaseResponse.success("공급기업 추천 성공", result));
+        } catch (Exception e) {
+            log.error("추천 로직에서 예외 발생: {}", e.getMessage(), e);
+            return ResponseEntity.internalServerError().body(BaseResponse.error(500, "추천 실패: 서버 오류"));
+        }
     }
 
     @Schema(description = "공급업체 정보")
