@@ -40,6 +40,9 @@ public class ContractController {
       @RequestParam(required = false) LocalDate date
   ) {
     List<ContractListResponseDto> list = contractService.getContractList(userId, companyId, role, userRole, date);
+    if (list == null || list.isEmpty()) {
+      return ResponseEntity.ok(BaseResponse.success("리스트가 없습니다.", null));
+    }
     return ResponseEntity.ok(BaseResponse.success("계약 리스트 조회", list));
   }
 
@@ -52,6 +55,9 @@ public class ContractController {
       @RequestHeader("X-User-Id") Long userId
   ) {
     List<ContractDto> list = contractService.getRequestsForBuyer(companyId, userRole, userId);
+    if (list == null || list.isEmpty()) {
+      return ResponseEntity.ok(BaseResponse.success("리스트가 없습니다.", null));
+    }
     return ResponseEntity.ok(BaseResponse.success("요청 리스트 조회", list));
   }
 
@@ -64,6 +70,9 @@ public class ContractController {
       @RequestHeader("X-User-Id") Long userId
   ) {
     List<ContractDto> list = contractService.getRequestsForSupplier(companyId, userRole, userId);
+    if (list == null || list.isEmpty()) {
+      return ResponseEntity.ok(BaseResponse.success("리스트가 없습니다.", null));
+    }
     return ResponseEntity.ok(BaseResponse.success("할당된 요청 리스트 조회", list));
   }
 
@@ -73,6 +82,9 @@ public class ContractController {
       @PathVariable Long requestId
   ) {
     ContractDto contract = contractService.getContractWithoutResponse(requestId);
+    if (contract == null) {
+      return ResponseEntity.ok(BaseResponse.success("결과가 없습니다.", null));
+    }
     return ResponseEntity.ok(BaseResponse.success(contract));
   }
 
@@ -83,6 +95,9 @@ public class ContractController {
       @RequestParam Long companyId
   ) {
     List<ContractHistoryDto> list = contractService.getContractHistoryByCompanyId(companyId);
+    if (list == null || list.isEmpty()) {
+      return ResponseEntity.ok(BaseResponse.success("리스트가 없습니다.", null));
+    }
     return ResponseEntity.ok(BaseResponse.success("할당된 요청 리스트 조회", list));
   }
 }

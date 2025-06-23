@@ -199,6 +199,13 @@
       AND c.buyer_user_id = #{userId}
   </select>
 
+  <select id="selectContractsByBuyerCompanyAndUser" resultType="ContractDto">
+    SELECT *
+    FROM contract
+    WHERE buyer_company_id = #{companyId}
+      AND created_by = #{userId}
+  </select>
+
   <!--  SUPPLIER인 경우 계약서(견적 요청 응답) 조회-->
   <select id="findContractsBySupplier" resultType="ContractListResponseDto" parameterType="map">
     SELECT
@@ -214,6 +221,13 @@
            JOIN estimate_request q ON r.request_id = q.request_id
     WHERE c.supplier_company_id = #{companyId}
       AND c.supplier_user_id = #{userId}
+  </select>
+
+  <select id="selectContractsBySupplierCompanyAndUser" resultType="ContractDto">
+    SELECT *
+    FROM contract
+    WHERE supplier_company_id = #{companyId}
+      AND responder_id = #{userId}
   </select>
 
   <!-- ResultMap 정의 -->
