@@ -15,65 +15,10 @@ spring:
     config:
       server:
         git:
-          uri: git@github.com:BizOnDam/Config.git
+          uri: https://github.com/BizOnDam/Config.git
           default-label: main
-
-          # 로컬 SSH 설정 무시
-          ignoreLocalSshSettings: true
-
-          # SSH Private Key
-          privateKey: |
-            -----BEGIN RSA PRIVATE KEY-----
-            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
-            -----END RSA PRIVATE KEY-----
+          username: kohyun0223
+          password: ${GIT_ACCESS_TOKEN}
 
 # Jasypt 복호화 설정
 jasypt:
