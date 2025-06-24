@@ -1,0 +1,39 @@
+server:
+  port: 8085
+
+jasypt:
+  encryptor:
+    password: ${ENCRYPTOR_PASSWORD}
+
+spring:
+  application:
+    name: contract-service
+  profiles:
+    active: dev
+  config:
+    import: optional:configserver:http://admin:1234@localhost:8888
+
+mybatis:
+  mapper-locations: classpath*:mybatis.mapper/*.xml
+  type-aliases-package: com.bizondam.contract_service.dto
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+
+logging:
+  level:
+    root: INFO
+    org.springframework: WARN
+    org.hibernate: ERROR
+    com.bizondam.contract_service: DEBUG
+    javax.management.remote.rmi: OFF
+    sun.rmi.transport: OFF
+    sun.rmi.transport.tcp: OFF
+    sun.rmi.loader: OFF
+
+gcp:
+  credentials:
+    location: classpath:gcp/bizondam-storage-key.json
