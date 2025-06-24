@@ -17,4 +17,4 @@ eureka:
     register-with-eureka: true  # Eureka 서버 클러스터에 자신을 등록할지 여부
     fetch-registry: true    # 다른 피어의 레지스트리 정보를 주기적으로 가져올지 여부
     service-url:
-      defaultZone: http://eureka:eurekapwd@localhost:8762/eureka/
+      defaultZone: http://eureka:eurekapwd@14.63.178.155:8762/eureka/
