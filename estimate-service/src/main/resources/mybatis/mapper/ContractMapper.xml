@@ -260,28 +260,37 @@
         WHEN er.status = 4 THEN er.request_id
         ELSE NULL
         END AS contractId,
+
       er.detail AS details,
+
+      DATE(
       CASE
-        WHEN er.status = 3 THEN c.created_at
-        WHEN er.status = 4 THEN er.created_at
-        ELSE NULL
-        END AS contractDate,
-      CASE
-        WHEN er.status = 3 THEN eresp.total_price
-        WHEN er.status = 4 AND er.response_id IS NOT NULL THEN eresp.total_price
-        ELSE NULL
-        END AS totalPrice,
-      CASE
-        WHEN er.status = 3 AND c.status = 1 THEN '2'
-        WHEN er.status = 3 AND c.status = 2 THEN '3'
-        WHEN er.status = 4 THEN '1'
-        ELSE NULL
-        END AS status
-    FROM estimate_request er
-           LEFT JOIN estimate_response eresp ON er.response_id = eresp.response_id
-           LEFT JOIN contracts c ON c.request_id = er.request_id
-    WHERE er.company_id = #{companyId}
-      AND (er.status = 3 OR er.status = 4)
+      WHEN er.status = 3 THEN c.created_at
+      WHEN er.status = 4 THEN er.created_at
+      ELSE NULL
+    END
+    ) AS contractDate,
+
+    CASE
+      WHEN er.status = 3 THEN eresp.total_price
+      WHEN er.status = 4 THEN NULL
+      ELSE NULL
+    END AS totalPrice,
+
+    CASE
+      WHEN er.status = 4 THEN '1'  -- 미체결
+      WHEN er.status = 3 AND c.status = 1 THEN '2' -- 계약 중
+      WHEN er.status = 3 AND c.status = 2 THEN '3' -- 계약 완료
+      ELSE NULL
+    END AS status
+
+  FROM estimate_request er
+    LEFT JOIN estimate_response eresp ON eresp.request_id = er.request_id
+    LEFT JOIN contracts c ON c.response_id = eresp.response_id
+
+  WHERE (er.buyer_company_id = #{companyId} OR er.supplier_company_id = #{companyId})
+    AND er.status IN (3, 4)
+
     ORDER BY COALESCE(c.created_at, er.created_at) DESC
   </select>
 
