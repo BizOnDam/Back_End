@@ -46,3 +46,6 @@ Thumbs.db       # Windows
 # 환경 설정
 .env
 *.local.yml
+
+# GCP 서비스 키
+**/resources/gcp/bizondam-storage-key.json
