@@ -17,6 +17,8 @@ public class SecurityConfig {
         .csrf(csrf -> csrf.disable())
         .authorizeHttpRequests(auth -> auth
             .requestMatchers(
+                "/api/companies/register",
+                "/api/companies/validate",
                 "/swagger-ui.html",
                 "/swagger-ui/**",
                 "/v3/api-docs/**",
@@ -25,7 +27,7 @@ public class SecurityConfig {
                 "/favicon.ico"
             ).permitAll()
             .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-            .anyRequest().authenticated()
+            .anyRequest().permitAll()
         );
 
     return http.build();
