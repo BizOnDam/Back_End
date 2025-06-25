@@ -5,25 +5,44 @@
 
 <mapper namespace="com.bizondam.contract_service.mapper.ContractMapper">
 
+    <!-- ContractDto 매핑 -->
     <resultMap id="ContractPdfResultMap" type="ContractDto">
         <id property="requestId" column="request_id"/>
         <result property="responseId" column="response_id"/>
-        <result property="contractId" column="contract_Id"/>
+        <result property="contractId" column="contract_id"/>
+
+        <!-- 회사 정보 -->
+        <result property="buyerCompanyId" column="buyer_company_id"/>
         <result property="buyerCompanyName" column="buyer_company_name"/>
         <result property="buyerCompanyAddress" column="buyer_company_address"/>
         <result property="buyerCompanyAddressDetail" column="buyer_company_address_detail"/>
+        <result property="supplierCompanyId" column="supplier_company_id"/>
         <result property="supplierCompanyName" column="supplier_company_name"/>
+
+        <!-- 유저 정보 -->
+        <result property="buyerUserId" column="buyer_user_id"/>
         <result property="buyerUserName" column="buyer_user_name"/>
         <result property="buyerUserPhone" column="buyer_user_phone"/>
+        <result property="supplierUserId" column="supplier_user_id"/>
         <result property="supplierUserName" column="supplier_user_name"/>
         <result property="supplierUserPhone" column="supplier_user_phone"/>
+
+        <!-- 계약/견적 관련 -->
+        <result property="detail" column="detail"/>
         <result property="dueDate" column="due_date"/>
         <result property="totalPrice" column="total_price"/>
         <result property="paymentTerms" column="payment_terms"/>
         <result property="warranty" column="warranty"/>
+        <result property="specialTerms" column="special_terms"/>
+
+        <!-- 계약 상태 및 파일 정보 -->
+        <result property="status" column="status"/>
+        <result property="contractFileUrl" column="contract_file_url"/>
         <result property="contractCreatedAt" column="contract_created_at"/>
+        <result property="contractUpdatedAt" column="contract_updated_at"/>
     </resultMap>
 
+    <!-- 품목 리스트 매핑 -->
     <resultMap id="ContractItemResultMap" type="ContractItemDto">
         <id property="itemId" column="item_id"/>
         <result property="specification" column="specification"/>
@@ -34,33 +53,72 @@
         <result property="deliveryDays" column="delivery_days"/>
     </resultMap>
 
+    <!--계약 생성-->
+    <insert id="insertContract" parameterType="ContractDto" useGeneratedKeys="true" keyProperty="contractId">
+        INSERT INTO contracts (
+            response_id,
+            buyer_company_id,
+            supplier_company_id,
+            buyer_user_id,
+            supplier_user_id,
+            status,
+            contract_file_url
+        )
+        VALUES (
+                   #{responseId},
+                   #{buyerCompanyId},
+                   #{supplierCompanyId},
+                   #{buyerUserId},
+                   #{supplierUserId},
+                   #{status},
+                   NULL
+               )
+    </insert>
 
-    <!--계약서 메타 + 회사 + 유저 정보 조회-->
+    <!-- 계약 기본 정보 + 회사/유저/견적 -->
     <select id="findContractPdfData" resultMap="ContractPdfResultMap" parameterType="map">
         SELECT
             er.request_id,
             resp.response_id,
-            cb.company_name_kr           AS buyer_company_name,
-            cb.address                   AS buyer_company_address,
-            cb.address_detail            AS buyer_company_address_detail,
-            cs.company_name_kr           AS supplier_company_name,
-            bu.name_kr                   AS buyer_user_name,
-            bu.phone_number              AS buyer_user_phone,
-            su.name_kr                   AS supplier_user_name,
-            su.phone_number              AS supplier_user_phone,
+            c.contract_id,
+
+            er.buyer_company_id,
+            cb.company_name_kr  AS buyer_company_name,
+            cb.address          AS buyer_company_address,
+            cb.address_detail   AS buyer_company_address_detail,
+
+            u.company_id        AS supplier_company_id,
+            cs.company_name_kr  AS supplier_company_name,
+
+            er.buyer_user_id,
+            bu.name_kr          AS buyer_user_name,
+            bu.phone_number     AS buyer_user_phone,
+
+            resp.supplier_user_id,
+            su.name_kr          AS supplier_user_name,
+            su.phone_number     AS supplier_user_phone,
+
+            er.detail,
             er.due_date,
+
             resp.total_price,
             resp.payment_terms,
             resp.warranty,
-            c.contract_Id,
-            c.created_at                 AS contract_created_at
-        FROM contracts c
-                 JOIN estimate_response resp ON c.response_id = resp.response_id
-                 JOIN estimate_request er     ON resp.request_id = er.request_id
-                 JOIN companies cb            ON er.buyer_company_id = cb.company_id
-                 JOIN companies cs            ON er.supplier_company_id = cs.company_id
-                 JOIN users bu                ON c.buyer_user_id = bu.user_id
-                 JOIN users su                ON c.supplier_user_id = su.user_id
+            resp.special_terms,
+
+            c.status,
+            c.contract_file_url,
+            c.created_at        AS contract_created_at,
+            c.updated_at        AS contract_updated_at
+
+        FROM estimate_response resp
+                 JOIN estimate_request  er ON resp.request_id = er.request_id
+                 LEFT JOIN contracts    c ON c.response_id = resp.response_id
+                 LEFT JOIN companies    cb ON er.buyer_company_id = cb.company_id
+                 LEFT JOIN companies    cs ON er.supplier_company_id = cs.company_id
+                 LEFT JOIN users        bu ON c.buyer_user_id = bu.user_id
+                 LEFT JOIN users        su ON c.supplier_user_id = su.user_id
+                 LEFT JOIN users        u ON resp.supplier_user_id = u.user_id
         WHERE er.request_id = #{requestId}
           AND resp.response_id = #{responseId}
     </select>
@@ -90,4 +148,10 @@
         WHERE contract_id = #{contractId}
     </update>
 
+    <!--계약서 url 조회-->
+    <select id="findContractFileUrlByContractId" resultType="string">
+        SELECT contract_file_url
+        FROM contracts
+        WHERE contract_id = #{contractId}
+    </select>
 </mapper>
