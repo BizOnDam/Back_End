@@ -1,6 +1,7 @@
 package com.bizondam.userservice.service;
 
 import com.bizondam.userservice.dto.request.SignUpRequest;
+import com.bizondam.userservice.entity.MyPageUserInfo;
 import com.bizondam.userservice.dto.response.SignUpResponse;
 import com.bizondam.userservice.entity.RoleInCompany;
 import com.bizondam.userservice.entity.User;
@@ -85,5 +86,10 @@ public class UserService {
   public boolean isLoginIdDuplicate(String loginId) {
     int count = userMapper.countByLoginId(loginId);
     return count > 0;
+  }
+
+  // 사용자 정보 조회
+  public MyPageUserInfo getMyPageUserInfo(Long userId) {
+    return userMapper.getMyPageUserInfo(userId);
   }
 }

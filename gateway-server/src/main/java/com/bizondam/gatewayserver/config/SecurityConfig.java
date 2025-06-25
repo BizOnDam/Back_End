@@ -24,6 +24,8 @@ public class SecurityConfig {
                 "/api/users/check-login-id",
                 "/api/users/email-auth",
                 "/api/users/email-auth/verify",
+                "/api/companies/register",
+                "/api/companies/validate",
                 // Swagger/OpenAPI 관련 경로
                 "/swagger-ui.html",
                 "/swagger-ui/**",
@@ -38,7 +40,7 @@ public class SecurityConfig {
                 "/matching-service/v3/api-docs",
                 "/contract-service/v3/api-docs"
             ).permitAll()
-            .anyExchange().permitAll() // 필요시 authenticated()로 변경
+            .anyExchange().permitAll()
         );
     return http.build();
   }

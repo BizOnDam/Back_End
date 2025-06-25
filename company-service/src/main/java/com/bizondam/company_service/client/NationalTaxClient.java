@@ -1,19 +1,81 @@
 package com.bizondam.company_service.client;
 
-import com.bizondam.company_service.config.NationalTaxFeignConfig;
 import com.bizondam.company_service.dto.CompanyValidationRequest;
-import com.bizondam.company_service.dto.CompanyValidateResultResponse;
-import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import com.fasterxml.jackson.databind.JsonNode;
+import java.util.List;
+import java.util.Map;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.*;
+import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestTemplate;
 
-@FeignClient(
-    name = "national-tax-client",
-    url = "${national-tax.api-url}",
-    configuration = NationalTaxFeignConfig.class,
-    fallback = NationalTaxFallback.class
-)
-public interface NationalTaxClient {
-    @PostMapping("/validate")
-    CompanyValidateResultResponse validateBusiness(@RequestBody CompanyValidationRequest request);
+@Component
+@RequiredArgsConstructor
+public class NationalTaxClient {
+
+    @Value("${national-tax.api-url}")
+    private String apiUrl;
+
+    @Value("${NATIONAL_TAX_API_KEY}")
+    private String serviceKey;
+
+    private final RestTemplate restTemplate;
+
+    public boolean verify(CompanyValidationRequest dto) {
+        // 헤더 설정
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
+        headers.set("Authorization", "Infuser " + serviceKey);
+
+        Map<String, Object> business = Map.of(
+            "b_no", dto.getB_no(),
+            "start_dt", dto.getStart_dt(),
+            "p_nm", dto.getP_nm(),
+            "p_nm2", "",
+            "b_nm", dto.getB_nm(),
+            "corp_no", "",
+            "b_sector", "",
+            "b_type", "",
+            "b_adr", ""
+        );
+
+        // 요청 본문 설정
+        Map<String, Object> body = Map.of("businesses", List.of(business));
+        // 요청 엔티티 설정
+        HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
+
+        System.out.println("▶ 요청 바디: " + body);
+        try {
+            // API 호출
+            ResponseEntity<JsonNode> response = restTemplate.exchange(
+                apiUrl,
+                HttpMethod.POST,
+                request,
+                JsonNode.class
+            );
+
+            System.out.println("▶ 응답 결과: " + response.getBody());
+
+            // 데이터에서 상태코드 추출 및 확인
+            JsonNode validCode = response.getBody()
+                .path("data")
+                .get(0)
+                .path("valid");
+
+            return "01".equals(validCode.asText());
+
+        } catch (HttpClientErrorException e) {
+            // 400 Bad Request 발생 시 에러 메시지 출력
+            System.err.println("▶ HTTP 요청 에러: " + e.getStatusCode());
+            System.err.println("▶ 에러 메시지: " + e.getResponseBodyAsString());
+            throw new IllegalStateException("국세청 API 요청 중 오류 발생: " + e.getMessage());
+        } catch (Exception e) {
+            // 기타 모든 예외 처리
+            System.err.println("▶ 알 수 없는 오류: " + e.getMessage());
+            throw new RuntimeException("API 호출 중 문제가 발생했습니다.", e);
+        }
+    }
 }

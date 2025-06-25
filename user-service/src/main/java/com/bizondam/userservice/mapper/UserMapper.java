@@ -1,5 +1,6 @@
 package com.bizondam.userservice.mapper;
 
+import com.bizondam.userservice.entity.MyPageUserInfo;
 import com.bizondam.userservice.entity.User;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -14,4 +15,6 @@ public interface UserMapper {
   int countByLoginId(@Param("loginId") String loginId);
   //휴대폰 번호로 사용자 조회
   boolean existsByPhoneNumber(@Param("phoneNumber") String phoneNumber);
+  //사용자 정보 조회
+  MyPageUserInfo getMyPageUserInfo(@Param("userId") Long userId);
 }

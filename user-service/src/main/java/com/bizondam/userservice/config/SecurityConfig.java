@@ -27,6 +27,7 @@ public class SecurityConfig {
                 "/api/users/check-login-id",
                 "/api/users/email-auth",
                 "/api/users/email-auth/verify",
+                "/api/users/mypage-info",
                 "/swagger-ui.html",
                 "/swagger-ui/**",
                 "/v3/api-docs/**",

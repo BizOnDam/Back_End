@@ -5,6 +5,7 @@ import com.bizondam.common.response.BaseResponse;
 import com.bizondam.userservice.dto.request.EmailSendRequest;
 import com.bizondam.userservice.dto.request.EmailVerifyRequest;
 import com.bizondam.userservice.dto.request.SignUpRequest;
+import com.bizondam.userservice.entity.MyPageUserInfo;
 import com.bizondam.userservice.dto.response.SignUpResponse;
 import com.bizondam.userservice.exception.UserErrorCode;
 import com.bizondam.userservice.service.EmailAuthService;
@@ -18,6 +19,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -79,5 +81,17 @@ public class UserController {
     } else {
       return ResponseEntity .badRequest().body(BaseResponse.fail("인증코드가 일치하지 않거나 만료되었습니다.", false));
     }
+  }
+
+  @Operation(summary = "마이페이지 사용자 정보 조회")
+  @GetMapping("/mypage-info")
+  public ResponseEntity<BaseResponse<MyPageUserInfo>> getMyPageUserInfo(
+      @RequestHeader("X-User-Id") Long userId
+  ) {
+    MyPageUserInfo result = userService.getMyPageUserInfo(userId);
+    if (result == null) {
+      return ResponseEntity.ok(BaseResponse.success("조회된 정보 없음", null));
+    }
+    return ResponseEntity.ok(BaseResponse.success("마이페이지 정보 조회 성공", result));
   }
 }

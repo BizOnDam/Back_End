@@ -23,10 +23,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**",
-                                "/webjars/**", "/favicon.ico"
+                                "/webjars/**", "/favicon.ico", "/api/recommend/**"
                         ).permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Preflight (OPTIONS 요청)은 인증 없이 허용
-                        .requestMatchers("/api/recommend/**").authenticated()
                         .anyRequest().permitAll()
                 )
                 // JWT 검증 필터
