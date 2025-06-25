@@ -4,10 +4,10 @@
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.bizondam.userservice.mapper.AuthMapper">
   <!-- 로그인을 위한 사용자 조회 -->
-  <select id="findByLoginId" parameterType="string" resultType="com.bizondam.userservice.entity.User">
+  <select id="findByLoginId" parameterType="string" resultType="User">
     SELECT * FROM users WHERE login_id = #{loginId}
   </select>
-  <select id="findByUserId" parameterType="long" resultType="com.bizondam.userservice.entity.User">
+  <select id="findByUserId" parameterType="long" resultType="User">
     SELECT * FROM users WHERE user_id = #{userId}
   </select>
 </mapper>

@@ -5,7 +5,7 @@
 <mapper namespace="com.bizondam.userservice.mapper.UserMapper">
 
   <!-- 회사별 사용자 수 조회 -->
-  <select id="countByCompanyId" parameterType="long" resultType="int">
+  <select id="countByCompanyId" parameterType="Long" resultType="int">
     SELECT COUNT(*)
     FROM users
     WHERE company_id = #{companyId}
@@ -58,5 +58,24 @@
   <!-- 휴대폰 번호로 중복 여부 조회 -->
   <select id="existsByPhoneNumber" parameterType="string" resultType="boolean">
     SELECT EXISTS(SELECT 1 FROM users WHERE phone_number = #{phoneNumber})
+  </select>
+
+  <!-- 사용자 정보 조회 -->
+  <select id="getMyPageUserInfo" parameterType="Long" resultType="MyPageUserInfo">
+    SELECT
+      u.name_kr AS nameKr,
+      u.name_en AS nameEn,
+      u.email AS email,
+      u.login_id AS loginId,
+      u.department AS department,
+      u.position AS position,
+      u.role_desc AS roleDesc,
+      u.phone_number AS phoneNumber,
+      c.company_name_kr AS companyNameKr
+    FROM
+      users u
+      JOIN companies c ON u.company_id = c.company_id
+    WHERE
+      u.user_id = #{userId}
   </select>
 </mapper>

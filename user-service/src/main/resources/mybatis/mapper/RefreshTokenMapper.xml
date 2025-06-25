@@ -15,7 +15,7 @@
   <!-- 조회 : userId + tokenId 로 RefreshToken 엔티티 전체 가져오기 -->
   <select id="findByUserIdAndTokenId"
     parameterType="map"
-    resultType="com.bizondam.userservice.entity.RefreshToken">
+    resultType="RefreshToken">
     SELECT
       user_id,
       token_id,
