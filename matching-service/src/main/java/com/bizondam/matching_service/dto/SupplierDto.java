@@ -1,12 +1,12 @@
 package com.bizondam.matching_service.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class SupplierDto {
     @Schema(description = "세부품명")
