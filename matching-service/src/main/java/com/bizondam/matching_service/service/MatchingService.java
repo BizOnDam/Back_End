@@ -36,7 +36,7 @@ public class MatchingService {
 
         // 4) 공통 공급업체 및 요약 메시지 생성
         List<SupplierDto> commonSuppliers = new ArrayList<>();
-        String summary;
+        OpenAiRecommendationDto result;
 
         if (!commonBiznos.isEmpty()) {
             // 교집합 기업에 대한 정보 조회
@@ -63,20 +63,22 @@ public class MatchingService {
                     "perItemSuppliers", perItemMap
             );
             String json = new ObjectMapper().writeValueAsString(gptPayload);
-            summary = openAiService.getRecommendation(json); // GPT 호출 결과 받기
+            result = openAiService.getRecommendation(json); // GPT 호출 결과 받기
         } catch (Exception e) {
             log.warn("GPT 요약 실패, 기본 메시지 사용", e);
-            summary = commonSuppliers.isEmpty()
-                    ? "공통 조달 가능 업체가 없습니다."
-                    : String.format("공급기업 추천 결과 %d개 존재합니다.", commonSuppliers.size());
+            return commonSuppliers.isEmpty()
+                    ? MatchingResultDto.perItem("공통 조달 가능 업체가 없습니다.", perItemMap)
+                    : MatchingResultDto.common(
+                    String.format("공급기업 추천 결과 %d개 존재합니다.", commonSuppliers.size()),
+                    commonSuppliers
+            );
         }
 
         // 6. 결과 반환
         return commonSuppliers.isEmpty()
-                ? MatchingResultDto.perItem(summary, perItemMap)
-                : MatchingResultDto.common(summary, commonSuppliers);
+                ? MatchingResultDto.perItem(result.getSummary(), perItemMap)
+                : MatchingResultDto.common(result.getSummary(), commonSuppliers);
     }
-
 
     // 교집합 로직 (fallback 3×3 루프)
     private Set<String> tryIntersection(List<EstimateItemDto> items) {
