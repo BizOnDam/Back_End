@@ -8,9 +8,9 @@ import org.apache.ibatis.annotations.Param;
 @Mapper
 public interface CompanyMapper {
   Company selectByBusinessNumber(@Param("businessNumber") String businessNumber);
-  Company findByCompanyId(Long companyId);
   List<Company> selectAllCompanies();
   int insertCompany(Company company);
   int updateCompany(Company company);
   int deleteCompany(Long companyId);
+  Company findById(Long companyId);
 }
