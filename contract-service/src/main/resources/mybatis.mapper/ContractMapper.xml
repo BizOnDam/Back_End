@@ -154,4 +154,107 @@
         FROM contracts
         WHERE contract_id = #{contractId}
     </select>
+
+    <!-- BUYER 계약 리스트 (CEO or STAFF) -->
+    <select id="findContractsByBuyer" resultType="ContractListResponseDto" parameterType="map">
+        SELECT
+        c.contract_id AS contractId,
+        q.request_id AS requestId,
+        r.response_id AS responseId,
+        c.supplier_company_id AS supplierCompanyId,
+        r.total_price AS totalPrice,
+        DATE_FORMAT(c.created_at, '%Y-%m-%d') AS contractDate,
+        q.due_date AS dueDate
+        FROM contracts c
+        JOIN estimate_response r ON c.response_id = r.response_id
+        JOIN estimate_request q ON r.request_id = q.request_id
+        WHERE c.buyer_company_id = #{companyId}
+        <if test="userId != null">
+            AND c.buyer_user_id = #{userId}
+        </if>
+    </select>
+
+    <!-- SUPPLIER 계약 리스트 (CEO or STAFF) -->
+    <select id="findContractsBySupplier" resultType="ContractListResponseDto" parameterType="map">
+        SELECT
+        c.contract_id AS contractId,
+        q.request_id AS requestId,
+        r.response_id AS responseId,
+        c.supplier_company_id AS supplierCompanyId,
+        r.total_price AS totalPrice,
+        DATE_FORMAT(c.created_at, '%Y-%m-%d') AS contractDate,
+        q.due_date AS dueDate
+        FROM contracts c
+        JOIN estimate_response r ON c.response_id = r.response_id
+        JOIN estimate_request q ON r.request_id = q.request_id
+        WHERE c.supplier_company_id = #{companyId}
+        <if test="userId != null">
+            AND c.supplier_user_id = #{userId}
+        </if>
+    </select>
+
+    <!-- 거래 이력 조회 -->
+    <select id="selectContractHistoryByCompanyId" resultType="ContractHistoryDto">
+        SELECT
+            CASE
+                WHEN er.status = 3 THEN c.contract_id
+                WHEN er.status = 4 THEN er.request_id
+                ELSE NULL
+                END AS contractId,
+
+            er.detail AS details,
+
+            DATE(
+            CASE
+            WHEN er.status = 3 THEN c.created_at
+            WHEN er.status = 4 THEN er.created_at
+            ELSE NULL
+        END
+        ) AS contractDate,
+
+    CASE
+      WHEN er.status = 3 THEN eresp.total_price
+      WHEN er.status = 4 THEN NULL
+      ELSE NULL
+        END AS totalPrice,
+
+    CASE
+      WHEN er.status = 4 THEN '1'  -- 미체결
+      WHEN er.status = 3 AND c.status = 1 THEN '2' -- 계약 중
+      WHEN er.status = 3 AND c.status = 2 THEN '3' -- 계약 완료
+      ELSE NULL
+        END AS status
+
+  FROM estimate_request er
+    LEFT JOIN estimate_response eresp ON eresp.request_id = er.request_id
+    LEFT JOIN contracts c ON c.response_id = eresp.response_id
+
+  WHERE (er.buyer_company_id = #{companyId} OR er.supplier_company_id = #{companyId})
+        AND er.status IN (3, 4)
+
+        ORDER BY COALESCE(c.created_at, er.created_at) DESC
+    </select>
+
+    <!-- 회사별 진행/완료 계약 건수 -->
+    <select id="countContractsByStatus" parameterType="map" resultType="int">
+        SELECT COUNT(*)
+        FROM contracts
+        WHERE status = #{status}
+          AND (buyer_company_id = #{companyId} OR supplier_company_id = #{companyId})
+    </select>
+
+    <!-- 회사별 대기중 견적 건수 -->
+    <select id="countPendingEstimates" parameterType="long" resultType="int">
+        SELECT COUNT(*)
+        FROM estimate_request
+        WHERE status IN (1, 2)
+          AND (buyer_company_id = #{companyId} OR supplier_company_id = #{companyId})
+    </select>
+
+    <!-- 계약 완료로 변경 -->
+    <update id="updateContractStatusToCompleted" parameterType="long">
+        UPDATE contracts
+        SET status = 2
+        WHERE contract_id = #{contractId} AND status = 1
+    </update>
 </mapper>

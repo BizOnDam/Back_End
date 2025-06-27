@@ -12,7 +12,7 @@ public interface EstimateResponseMapper {
   // 2) 2) estimate_response_item 테이블에 각 품목별 단가 INSERT
   void insertEstimateResponseItem(@Param("responseId") Long responseId,
       @Param("item") EstimateResponseItemDto item);
-  // 3) 계약 체결/미체결 시, estimate_response.status UPDATE
+  // 3) 계약 미체결 시, estimate_response.status UPDATE
   void updateResponseStatus(@Param("responseId") Long responseId,
       @Param("status") Integer status);
   // 4) requestId로 responseId 검색

@@ -1,4 +1,4 @@
-package com.bizondam.estimateservice.dto;
+package com.bizondam.contract_service.dto;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
