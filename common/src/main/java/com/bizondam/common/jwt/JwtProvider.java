@@ -77,6 +77,9 @@ public class JwtProvider {
       throw new CustomException(AuthErrorCode.INVALID_SIGNATURE);
     } catch (IllegalArgumentException e) {
       throw new CustomException(AuthErrorCode.ILLEGAL_ARGUMENT);
+    } catch (Exception e) {
+      log.error("예상치 못한 JWT 파싱 에러: {}", e.getMessage(), e);
+      throw new CustomException(AuthErrorCode.UNKNOWN_TOKEN_ERROR);
     }
   }
 

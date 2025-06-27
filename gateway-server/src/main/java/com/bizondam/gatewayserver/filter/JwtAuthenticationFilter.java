@@ -119,7 +119,7 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
     exchange.getResponse().setStatusCode(status);
     exchange.getResponse().getHeaders().setContentType(MediaType.APPLICATION_JSON);
     ObjectMapper om = new ObjectMapper();
-    BaseResponse<Object> errorBody = BaseResponse.fail(401, "JWT 토큰이 만료되었습니다", null);
+    BaseResponse<Object> errorBody = BaseResponse.fail(status.value(), message, null);
 
     try {
       byte[] bytes = om.writeValueAsBytes(errorBody); // JSON 직렬화

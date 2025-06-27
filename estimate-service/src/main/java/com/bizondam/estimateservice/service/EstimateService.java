@@ -3,7 +3,6 @@ package com.bizondam.estimateservice.service;
 import com.bizondam.common.exception.CustomException;
 import com.bizondam.estimateservice.dto.*;
 import com.bizondam.estimateservice.exception.EstimateErrorCode;
-import com.bizondam.estimateservice.mapper.ContractMapper;
 import com.bizondam.estimateservice.mapper.EstimateRequestMapper;
 import com.bizondam.estimateservice.mapper.EstimateResponseMapper;
 import com.bizondam.estimateservice.model.EstimateRequestItem;
@@ -20,9 +19,19 @@ import org.springframework.transaction.annotation.Transactional;
 public class EstimateService {
   private final EstimateRequestMapper requestMapper;
   private final EstimateResponseMapper responseMapper;
-  private final ContractMapper contractMapper;
 
-  // 1) 견적 요청서 생성
+  public ContractDto getContract(Long requestId, Long responseId) {
+    ContractDto dto = requestMapper.findContractByRequestIdAndResponseId(requestId, responseId);
+    if (dto == null) {
+      throw new CustomException(EstimateErrorCode.ESTIMATE_NOT_FOUND);
+    }
+    // 품목 리스트 조회 및 세팅
+    List<ContractItemDto> items = requestMapper.findContractItemsByRequestIdAndResponseId(requestId, responseId);
+    dto.setItems(items);
+    return dto;
+  }
+
+  // 견적 요청서 생성
   @Transactional
   public List<EstimateRequestItem> createEstimateAndReturnItems(EstimateRequestCreateDto dto) {
     requestMapper.insertEstimateRequest(dto);
@@ -43,13 +52,13 @@ public class EstimateService {
     return itemList;
   }
 
-  // 2) 수요 업체에서 공급 업체 지정
+  // 수요 업체에서 공급 업체 지정
   @Transactional
   public void assignSupplierByBusinessNumber(Long requestId, String businessNumber) {
     requestMapper.updateSupplierCompany(requestId, businessNumber);
   }
 
-  // 3) 견적 응답 생성(공급 업체에서 답변)
+  // 견적 응답 생성(공급 업체에서 답변)
   @Transactional
   public Long createResponse(EstimateResponseCreateDto dto) {
     // estimate_response 헤더 INSERT (responseId 자동 생성)
@@ -68,36 +77,7 @@ public class EstimateService {
     return responseId;
   }
 
-  // 4) 계약 체결
-  @Transactional
-  public void acceptContract(Long requestId) {
-    requestMapper.updateRequestStatus(requestId, 3);
-
-    Long responseId = responseMapper.findResponseIdByRequestId(requestId);
-    if (responseId == null) {
-      throw new CustomException(EstimateErrorCode.ESTIMATE_NOT_FOUND);
-    }
-
-    responseMapper.updateResponseStatus(responseId, 3);
-
-    // ContractMapper로 한 번에 조회
-    ContractDto contractData = contractMapper.findContractByRequestIdAndResponseId(requestId, responseId);
-
-    // 계약 정보 생성
-    ContractCreateDto contract = new ContractCreateDto();
-    contract.setResponseId(responseId);
-    contract.setBuyerUserId(contractData.getBuyerUserId());
-    contract.setBuyerCompanyId(contractData.getBuyerCompanyId());
-    contract.setSupplierCompanyId(contractData.getSupplierCompanyId());
-    contract.setSupplierUserId(contractData.getSupplierUserId());
-    contract.setStatus(1);  // 거래중
-    contract.setContractFileUrl(null); // 나중에 PATCH
-
-    // 계약 저장
-    contractMapper.insertContract(contract);
-  }
-
-  // 5) 계약 미체결 - 수요 업체가 거절한 경우
+  // 계약 미체결 - 수요 업체가 거절한 경우
   @Transactional
   public void rejectByBuyer(Long requestId) {
     requestMapper.updateRequestStatus(requestId, 4);
@@ -109,7 +89,7 @@ public class EstimateService {
     responseMapper.updateResponseStatus(responseId, 4);
   }
 
-  // 6) 계약 미체결 - 공급 업체가 거절한 경우
+  // 계약 미체결 - 공급 업체가 거절한 경우
   @Transactional
   public void rejectBySupplier(Long requestId, Long supplierUserId) {
     requestMapper.updateRequestStatus(requestId, 4);
@@ -136,5 +116,55 @@ public class EstimateService {
       responseId = newResponse.getResponseId();
       responseMapper.updateResponseStatus(responseId, 4); // 상태 4로 변경
     }
+  }
+
+  // 견적 요청서만 존재하는 경우
+  public ContractDto getContractWithoutResponse(Long requestId) {
+    ContractDto dto = requestMapper.findRequestByRequestIdOnly(requestId);
+    if (dto == null) {
+      throw new CustomException(EstimateErrorCode.ESTIMATE_NOT_FOUND);
+    }
+    // items 채우기
+    List<ContractItemDto> items = requestMapper.findRequestItemsByRequestIdOnly(requestId);
+    dto.setItems(items);
+    return dto;
+  }
+
+  // 수요 업체용
+  public List<ContractDto> getRequestsForBuyer(Long companyId, String userRole, Long userId) {
+    List<ContractDto> list;
+    if ("CEO".equalsIgnoreCase(userRole)) {
+      // 회사의 모든 요청서
+      list = requestMapper.selectRequestsByBuyerCompany(companyId);
+    } else {
+      // STAFF: 본인이 생성한 요청서만
+      list = requestMapper.selectRequestsByBuyerCompanyAndUser(companyId, userId);
+    }
+    for (ContractDto dto : list) {
+      List<ContractItemDto> items = requestMapper.findContractItemsByRequestIdAndResponseId(
+          dto.getRequestId(), dto.getResponseId()
+      );
+      dto.setItems(items);
+    }
+    return list;
+  }
+
+  // 공급 업체용
+  public List<ContractDto> getRequestsForSupplier(Long companyId, String userRole, Long userId) {
+    List<ContractDto> list;
+    if ("CEO".equalsIgnoreCase(userRole)) {
+      // 회사의 모든 할당 요청서
+      list = requestMapper.selectRequestsBySupplierCompany(companyId);
+    } else {
+      // STAFF: 본인이 응답한 요청서만
+      list = requestMapper.selectRequestsBySupplierCompanyAndUser(companyId, userId);
+    }
+    for (ContractDto dto : list) {
+      List<ContractItemDto> items = requestMapper.findContractItemsByRequestIdAndResponseId(
+          dto.getRequestId(), dto.getResponseId()
+      );
+      dto.setItems(items);
+    }
+    return list;
   }
 }
