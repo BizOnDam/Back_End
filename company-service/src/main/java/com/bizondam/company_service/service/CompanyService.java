@@ -98,4 +98,13 @@ public class CompanyService {
   public void deleteCompany(Long companyId) {
     companyMapper.deleteCompany(companyId);
   }
+
+  // 사용자의 회사 정보 조회
+  public CompanyResponse getCompanyInfo(Long companyId) {
+    Company company = companyMapper.findById(companyId);
+    if (company == null) {
+      throw new IllegalArgumentException("해당 기업이 존재하지 않습니다.");
+    }
+    return new CompanyResponse(company);
+  }
 }

@@ -78,4 +78,10 @@
     WHERE company_id = #{companyId}
   </delete>
 
+  <!--회사 정보 조회-->
+  <select id="findById" parameterType="long" resultMap="CompanyResultMap">
+    SELECT *
+    FROM companies
+    WHERE company_id = #{companyId}
+  </select>
 </mapper>

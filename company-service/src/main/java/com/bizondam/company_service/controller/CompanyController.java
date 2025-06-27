@@ -69,4 +69,10 @@ public class CompanyController {
             .companyNameKr(validationRequest.getB_nm())
             .build();
     }
+
+    @GetMapping("/{companyId}")
+    public ResponseEntity<CompanyResponse> getCompanyById(@PathVariable Long companyId) {
+        CompanyResponse response = companyService.getCompanyInfo(companyId);
+        return ResponseEntity.ok(response);
+    }
 }
