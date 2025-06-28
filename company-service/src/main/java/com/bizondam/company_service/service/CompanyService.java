@@ -1,12 +1,19 @@
 package com.bizondam.company_service.service;
 
+import com.bizondam.common.exception.CustomException;
 import com.bizondam.company_service.dto.CompanyResponse;
 import com.bizondam.company_service.dto.CompanyValidateResultResponse;
+import com.bizondam.company_service.dto.StaffUpdateRequest;
 import com.bizondam.company_service.entity.Company;
 import com.bizondam.company_service.dto.CompanyRequest;
 import com.bizondam.company_service.dto.CompanyValidationRequest;
+import com.bizondam.company_service.entity.CompanyUser;
+import com.bizondam.company_service.exception.CompanyErrorCode;
 import com.bizondam.company_service.mapper.CompanyMapper;
 import com.bizondam.company_service.client.NationalTaxClient;
+import com.bizondam.company_service.mapper.CompanyUserMapper;
+import com.bizondam.company_service.entity.CompanyUserEntity;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class CompanyService {
   private final CompanyMapper companyMapper;
+  private final CompanyUserMapper companyUserMapper;
   private final NationalTaxClient nationalTaxClient;
 
   // 국세청 검증 + DB 존재 여부 확인 메서드
@@ -84,21 +92,6 @@ public class CompanyService {
     return new CompanyResponse(company);
   }
 
-  //전체 조회
-  public List<Company> getAllCompanies() {
-    return companyMapper.selectAllCompanies();
-  }
-
-  //수정
-  public void updateCompany(Company company) {
-    companyMapper.updateCompany(company);
-  }
-
-  //삭제
-  public void deleteCompany(Long companyId) {
-    companyMapper.deleteCompany(companyId);
-  }
-
   // 사용자의 회사 정보 조회
   public CompanyResponse getCompanyInfo(Long companyId) {
     Company company = companyMapper.findById(companyId);
@@ -106,5 +99,104 @@ public class CompanyService {
       throw new IllegalArgumentException("해당 기업이 존재하지 않습니다.");
     }
     return new CompanyResponse(company);
+  }
+
+  // 회사 내 모든 직원 조회
+  public List<CompanyUser> getUsersInCompany(String userRole, Long companyId) {
+    validateCeo(userRole);
+
+    List<CompanyUserEntity> users = companyUserMapper.selectUsersByCompany(companyId);
+
+    return users.stream()
+        .map(CompanyUser::fromEntity)
+        .collect(Collectors.toList());
+  }
+
+  // 특정 직원 상세 조회
+  public CompanyUser getUserDetail(String requesterRole, Long companyId, Long targetUserId) {
+    validateCeo(requesterRole);
+    CompanyUserEntity user = companyUserMapper.selectUserByIdAndCompany(targetUserId, companyId);
+    if (user == null || Boolean.TRUE.equals(user.isDeleted())) {
+      throw new CustomException(CompanyErrorCode.USER_NOT_FOUND);
+    }
+    return CompanyUser.fromEntity(user);
+  }
+
+  // 특정 직원 삭제
+  public void deleteStaff(Long requesterId, String userRole, Long companyId, Long targetUserId) {
+    validateCeo(userRole);
+
+    // 자기 자신 삭제 방지
+    if (requesterId.equals(targetUserId)) {
+      throw new CustomException(CompanyErrorCode.USER_CANNOT_DELETE_SELF);
+    }
+
+    // 직원 존재 여부 확인
+    CompanyUserEntity target = companyUserMapper.selectUserByIdAndCompany(targetUserId, companyId);
+    if (target == null) {
+      throw new CustomException(CompanyErrorCode.USER_NOT_FOUND);
+    }
+
+    // 이미 삭제된 경우
+    if (target.isDeleted()) {
+      throw new CustomException(CompanyErrorCode.USER_ALREADY_DELETED);
+    }
+
+    // CEO는 삭제 불가
+    if ("CEO".equalsIgnoreCase(target.getRoleInCompany())) {
+      throw new CustomException(CompanyErrorCode.USER_CANNOT_DELETE_CEO);
+    }
+
+    companyUserMapper.deleteStaff(targetUserId);
+  }
+
+  // 직원 정보 수정
+  public void updateStaff(Long requesterId, String userRole, Long companyId, Long targetUserId, StaffUpdateRequest request) {
+    validateCeo(userRole);
+
+    CompanyUserEntity target = companyUserMapper.selectUserByIdAndCompany(targetUserId, companyId);
+    if (target == null || target.isDeleted()) {
+      throw new CustomException(CompanyErrorCode.USER_NOT_FOUND);
+    }
+
+    companyUserMapper.updateStaffInfo(targetUserId, request.getDepartment(), request.getPosition(), request.getRoleDesc(), LocalDateTime.now());
+  }
+
+  public void transferCeoRole(Long requesterId, String userRole, Long companyId, Long targetUserId) {
+    validateCeo(userRole);
+
+    if (requesterId.equals(targetUserId)) {
+      throw new CustomException(CompanyErrorCode.USER_CANNOT_TRANSFER_TO_SELF);
+    }
+
+    CompanyUserEntity requester = companyUserMapper.selectUserByIdAndCompany(requesterId, companyId);
+    CompanyUserEntity target = companyUserMapper.selectUserByIdAndCompany(targetUserId, companyId);
+
+    if (requester == null || target == null) {
+      throw new CustomException(CompanyErrorCode.USER_NOT_FOUND);
+    }
+
+    if (requester.isDeleted() || target.isDeleted()) {
+      throw new CustomException(CompanyErrorCode.USER_ALREADY_DELETED);
+    }
+
+    if (!"CEO".equalsIgnoreCase(requester.getRoleInCompany())) {
+      throw new CustomException(CompanyErrorCode.USER_NOT_CEO);
+    }
+
+    if (!"STAFF".equalsIgnoreCase(target.getRoleInCompany())) {
+      throw new CustomException(CompanyErrorCode.USER_TRANSFER_TARGET_MUST_BE_STAFF);
+    }
+
+    // 트랜잭션 내에서 두 사람의 role_in_company를 교환
+    companyUserMapper.updateRoleInCompany(requesterId, "STAFF", LocalDateTime.now());
+    companyUserMapper.updateRoleInCompany(targetUserId, "CEO", LocalDateTime.now());
+  }
+
+  // CEO 권한 검증
+  private void validateCeo(String userRole) {
+    if (!"CEO".equalsIgnoreCase(userRole)) {
+      throw new CustomException(CompanyErrorCode.USER_NOT_CEO);
+    }
   }
 }
