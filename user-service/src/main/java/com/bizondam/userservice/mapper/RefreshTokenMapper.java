@@ -9,7 +9,6 @@ import org.apache.ibatis.annotations.Param;
 @Mapper
 public interface RefreshTokenMapper {
   Optional<RefreshToken> findByUserIdAndTokenId(
-      @Param("userId") Long userId,
       @Param("tokenId") String tokenId
   );
 

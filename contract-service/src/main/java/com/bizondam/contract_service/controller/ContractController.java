@@ -3,6 +3,7 @@ package com.bizondam.contract_service.controller;
 import com.bizondam.common.response.BaseResponse;
 import com.bizondam.contract_service.dto.ContractHistoryDto;
 import com.bizondam.contract_service.dto.ContractListResponseDto;
+import com.bizondam.contract_service.dto.CounterpartyInfoDto;
 import com.bizondam.contract_service.dto.TradeSummaryDto;
 import com.bizondam.contract_service.service.ContractService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -95,5 +96,17 @@ public class ContractController {
             return ResponseEntity.ok(BaseResponse.success("리스트가 없습니다.", null));
         }
         return ResponseEntity.ok(BaseResponse.success("할당된 요청 리스트 조회", list));
+    }
+
+    // 계약 상세보기 내에 계약자 정보 보기
+    @Operation(summary = "계약 업체 정보", description = "상대 업체의 계약자 정보")
+    @GetMapping("/counterparty-info/{contractId}")
+    public ResponseEntity<BaseResponse<CounterpartyInfoDto>> getCounterpartyInfo(
+        @PathVariable Long contractId,
+        @RequestHeader("X-User-Id") Long userId,
+        @RequestHeader("X-User-Role") String userRole) {
+
+        CounterpartyInfoDto info = contractService.getCounterpartyInfo(contractId, userId);
+        return ResponseEntity.ok(BaseResponse.success(info));
     }
 }

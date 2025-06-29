@@ -4,6 +4,8 @@ import com.bizondam.contract_service.dto.ContractDto;
 import com.bizondam.contract_service.dto.ContractHistoryDto;
 import com.bizondam.contract_service.dto.ContractItemDto;
 import com.bizondam.contract_service.dto.ContractListResponseDto;
+import com.bizondam.contract_service.dto.CounterpartyInfoDto;
+import feign.Contract;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -29,9 +31,6 @@ public interface ContractMapper {
     // 거래 완료로 업데이트
     int updateContractStatusToCompleted(@Param("contractId") Long contractId);
 
-    // 계약서 단일 객체 조회
-    ContractDto findContractByRequestIdAndResponseId(@Param("requestId") Long requestId, @Param("responseId") Long responseId);
-
     // 품목 리스트 조회
     List<ContractItemDto> findContractItemsByRequestIdAndResponseId(@Param("requestId") Long requestId, @Param("responseId") Long responseId);
 
@@ -45,4 +44,10 @@ public interface ContractMapper {
     // 계약 체결 시 request, response status 변경
     void updateRequestStatus(@Param("requestId") Long requestId, @Param("status") Integer status);
     void updateResponseStatus(@Param("responseId") Long responseId, @Param("status") Integer status);
+
+    // 담당자 정보 조회
+    ContractDto findContractDtoById(@Param("contractId") Long contractId);
+    Long findCompanyIdByUserId(@Param("userId") Long userId);
+    CounterpartyInfoDto getSupplierInfoByBuyer(@Param("buyerCompanyId") Long buyerCompanyId, @Param("contractId") Long contractId);
+    CounterpartyInfoDto getBuyerInfoBySupplier(@Param("supplierCompanyId") Long supplierCompanyId, @Param("contractId") Long contractId);
 }
