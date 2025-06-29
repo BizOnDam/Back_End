@@ -8,7 +8,7 @@
   <select id="selectUsersByCompany" resultType="CompanyUserEntity">
     SELECT user_id, company_id, email, login_id, name_kr,
            department, position, role_desc, phone_number,
-           role_in_company, is_deleted
+           role_in_company, created_at, is_deleted
     FROM users
     WHERE company_id = #{companyId}
       AND is_deleted = FALSE
@@ -18,7 +18,7 @@
   <select id="selectUserByIdAndCompany" resultType="CompanyUserEntity">
     SELECT user_id, company_id, email, login_id, name_kr,
            department, position, role_desc, phone_number,
-           role_in_company, is_deleted
+           role_in_company, created_at, is_deleted
     FROM users
     WHERE user_id = #{userId}
       AND company_id = #{companyId}
