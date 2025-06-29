@@ -1,6 +1,5 @@
 package com.bizondam.userservice.mapper;
 
-import com.bizondam.userservice.dto.response.SignUpResponse;
 import com.bizondam.userservice.entity.MyPageUserInfo;
 import com.bizondam.userservice.entity.User;
 import org.apache.ibatis.annotations.Mapper;

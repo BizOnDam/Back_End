@@ -17,6 +17,7 @@ public class RouteValidator {
       "/user-service/api/users/check-login-id",
       "/user-service/api/users/email-auth",
       "/user-service/api/users/email-auth/verify",
+      "/user-service/api/users/update-password",
       "/company-service/api/companies/register",
       "/company-service/api/companies/validate",
       // Swagger/OpenAPI 관련 경로
