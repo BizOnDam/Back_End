@@ -14,6 +14,7 @@ public class MyPageUserInfo {
   private String nameEn;
   private String email;
   private String loginId;
+  private String loginPwd;
   private String department;
   private String position;
   private String roleDesc;

@@ -106,7 +106,7 @@ public class ContractService {
 
         // 이하 품목 및 날짜 필터링 로직 동일
         for (ContractListResponseDto dto : contracts) {
-            List<ContractItemDto> items = contractMapper.findContractItemsByRequestIdAndResponseId(
+            List<ContractItemDto> items = contractMapper.findContractPdfItems(
                 dto.getRequestId(), dto.getResponseId());
             List<String> itemNames = items.stream()
                 .map(ContractItemDto::getDetailCategoryName)
