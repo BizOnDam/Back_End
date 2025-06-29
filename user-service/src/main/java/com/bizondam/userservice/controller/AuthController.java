@@ -29,7 +29,6 @@ public class AuthController {
   @PostMapping("/login")
   public ResponseEntity<BaseResponse<LoginResponse>> login(@RequestBody LoginRequest request) {
     try {
-      log.info("로그인 시도 login request: {}", request);
       LoginResponse loginResponse = authService.login(request.getLoginId(), request.getLoginPwd());
       return ResponseEntity.ok(BaseResponse.success("로그인 성공", loginResponse));
     } catch (CustomException e) {

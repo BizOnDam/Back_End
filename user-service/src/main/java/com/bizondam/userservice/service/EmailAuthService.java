@@ -1,7 +1,9 @@
 package com.bizondam.userservice.service;
 
 import com.bizondam.userservice.entity.EmailAuth;
+import com.bizondam.userservice.entity.User;
 import com.bizondam.userservice.mapper.EmailAuthMapper;
+import com.bizondam.userservice.mapper.UserMapper;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,30 +15,30 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @RequiredArgsConstructor
 public class EmailAuthService {
-
+  private final UserMapper userMapper;
   private final EmailAuthMapper emailAuthMapper;
   private final MailService mailService;
 
-  public void createAndSendAuthCode(String email) {
-    // 0. users 테이블에 이메일 존재 여부 확인
+  public void createAndSendAuthCodeForSignup(String email) {
     if (emailAuthMapper.existsByEmail(email)) {
-      log.warn("이메일 인증 요청 실패 - 이미 가입된 이메일 (email: {})", email);
       throw new IllegalArgumentException("이미 가입된 이메일입니다.");
     }
+    createAndSendAuthCode(email);
+  }
 
-    // 1. 기존 인증 정보 삭제
+  public void createAndSendAuthCodeForFindId(String email) {
+    if (!emailAuthMapper.existsByEmail(email)) {
+      throw new IllegalArgumentException("등록되지 않은 이메일입니다.");
+    }
+    createAndSendAuthCode(email);
+  }
+
+  private void createAndSendAuthCode(String email) {
     emailAuthMapper.deleteByEmail(email);
-
-    // 2. 새 인증번호 생성 및 저장
     String code = generateRandomCode();
     EmailAuth emailAuth = new EmailAuth(null, email, code, LocalDateTime.now().plusMinutes(10));
     emailAuthMapper.insertEmailAuth(emailAuth);
-
-    log.info("이메일 인증코드 생성 및 저장 (email: {}, code: {})", email, code);
-
-    // 3. 이메일 발송
     mailService.send(email, "이메일 인증코드", "인증코드: " + code);
-    log.info("이메일 인증코드 발송 완료 (email: {})", email);
   }
 
   public boolean isVerified(String email, String code) {
@@ -57,5 +59,13 @@ public class EmailAuthService {
   private String generateRandomCode() {
     int code = (int)(Math.random() * 900000) + 100000;
     return String.valueOf(code);
+  }
+
+  public boolean isVerifiedAndMatch(String email, String code, String loginId) {
+    boolean verified = isVerified(email, code);
+    if (!verified) return false;
+
+    User user = userMapper.findByLoginId(loginId);
+    return user != null && user.getEmail().equals(email);
   }
 }
