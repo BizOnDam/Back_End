@@ -5,19 +5,22 @@ import com.bizondam.common.exception.CustomException;
 import com.bizondam.common.jwt.JwtProvider;
 import com.bizondam.userservice.dto.response.LoginResponse;
 import com.bizondam.userservice.entity.Company;
-import com.bizondam.userservice.entity.RefreshToken;
 import com.bizondam.userservice.entity.User;
 import com.bizondam.userservice.mapper.AuthMapper;
 import com.bizondam.userservice.mapper.CompanyMapper;
 import com.bizondam.userservice.mapper.RefreshTokenMapper;
 import io.jsonwebtoken.Claims;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.time.LocalDateTime;
-import java.util.Date;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 @Service
 public class AuthService {
@@ -52,7 +55,7 @@ public class AuthService {
   // 리프레시 토큰 재발급(토큰 로테이션)
   public LoginResponse reissueRefreshTokens(Long userId, String refreshToken) {
     // 1. 리프레시 토큰 유효성 검증
-    if (!validateRefreshToken(userId, refreshToken)) {
+    if (!validateRefreshToken(refreshToken)) {
       throw new CustomException(AuthErrorCode.REFRESH_TOKEN_REQUIRED);
     }
     // 2. 사용자 정보 조회
@@ -65,12 +68,15 @@ public class AuthService {
   }
 
   // 액세스 토큰만 재발급 (리프레시 토큰은 기존 것 사용)
-  public LoginResponse reissueAccessToken(Long userId, String refreshToken) {
-    if (!validateRefreshToken(userId, refreshToken)) {
+  public LoginResponse reissueAccessToken(String refreshToken) {
+    String userId = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
+        .getRequest().getHeader("X-User-Id");
+
+    if (!validateRefreshToken(refreshToken)) {
       throw new CustomException(AuthErrorCode.REFRESH_TOKEN_REQUIRED);
     }
 
-    User user = authMapper.findByUserId(userId);
+    User user = authMapper.findByUserId(Long.valueOf(userId));
     if (user == null) {
       throw new CustomException(AuthErrorCode.USER_INFO_FAIL);
     }
@@ -79,16 +85,18 @@ public class AuthService {
   }
 
   // 리프레시 토큰 검증 로직
-  public boolean validateRefreshToken(Long userId, String refreshToken) {
-    Claims claims = jwtProvider.getClaimsIgnoreExpiration(refreshToken);
-    String tokenId = claims.getId();
+  public boolean validateRefreshToken(String refreshToken) {
+    String encrypted = encryptToken(refreshToken);
+    try {
+      Claims claims = jwtProvider.getClaims(encrypted);
+      String tokenId = claims.getId();
 
-    RefreshToken token = refreshTokenMapper.findByUserIdAndTokenId(userId, tokenId)
-        .orElse(null);
-
-    if (token == null) return false;
-
-    return token.getExpiresAt().isAfter(LocalDateTime.now());
+      return refreshTokenMapper.findByUserIdAndTokenId(tokenId)
+          .filter(rt -> rt.getRefreshToken().equals(encrypted))
+          .isPresent();
+    } catch (CustomException e) {
+      return false;
+    }
   }
 
   // 로그아웃(리프레시 토큰 폐기)
@@ -106,13 +114,13 @@ public class AuthService {
     // JWT claims 생성
     Map<String, Object> claims = new HashMap<>();
     claims.put("userId", user.getUserId());
-    claims.put("loginId", user.getLoginId());
     claims.put("role", user.getRoleInCompany().name());
 
     // AccessToken, RefreshToken 발급
     String accessToken = jwtProvider.createAccessToken(user.getLoginId(), claims);
     String refreshTokenId = UUID.randomUUID().toString();
     String refreshToken = jwtProvider.createRefreshToken(user.getLoginId(), refreshTokenId);
+    String encryptedRefreshToken = encryptToken(refreshToken);
 
     // 만료 시간 계산
     LocalDateTime expiresAt = LocalDateTime.now().plusSeconds(jwtProvider.getRefreshTokenExpireTime() / 1000);
@@ -122,7 +130,7 @@ public class AuthService {
       refreshTokenMapper.insertOrUpdateRefreshToken(
           user.getUserId(),
           refreshTokenId,
-          refreshToken,
+          encryptedRefreshToken,
           expiresAt
       );
     } catch (Exception e) {
@@ -167,5 +175,15 @@ public class AuthService {
         .companyNameKr(companyNameKr)
         .expirationTime(expirationTime)
         .build();
+  }
+
+  private String encryptToken(String token) {
+    try {
+      MessageDigest digest = MessageDigest.getInstance("SHA-256");
+      byte[] encodedHash = digest.digest(token.getBytes(StandardCharsets.UTF_8));
+      return Base64.getEncoder().encodeToString(encodedHash);
+    } catch (Exception e) {
+      throw new CustomException(AuthErrorCode.TOKEN_FAIL); // 적절한 에러 코드 사용
+    }
   }
 }
