@@ -1,5 +1,6 @@
 package com.bizondam.userservice.mapper;
 
+import com.bizondam.userservice.dto.response.SignUpResponse;
 import com.bizondam.userservice.entity.MyPageUserInfo;
 import com.bizondam.userservice.entity.User;
 import org.apache.ibatis.annotations.Mapper;
@@ -17,4 +18,8 @@ public interface UserMapper {
   boolean existsByPhoneNumber(@Param("phoneNumber") String phoneNumber);
   //사용자 정보 조회
   MyPageUserInfo getMyPageUserInfo(@Param("userId") Long userId);
+  // 비밀번호 변경
+  void updatePassword(@Param("userId") Long userId, @Param("newPassword") String newPassword);
+  // 로그인 아이디로 사용자
+  User findByLoginId(@Param("loginId") String loginId);
 }

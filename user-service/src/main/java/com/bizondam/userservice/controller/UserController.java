@@ -2,9 +2,7 @@ package com.bizondam.userservice.controller;
 
 import com.bizondam.common.exception.CustomException;
 import com.bizondam.common.response.BaseResponse;
-import com.bizondam.userservice.dto.request.EmailSendRequest;
-import com.bizondam.userservice.dto.request.EmailVerifyRequest;
-import com.bizondam.userservice.dto.request.SignUpRequest;
+import com.bizondam.userservice.dto.request.*;
 import com.bizondam.userservice.entity.MyPageUserInfo;
 import com.bizondam.userservice.dto.response.SignUpResponse;
 import com.bizondam.userservice.exception.UserErrorCode;
@@ -16,13 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -93,5 +85,25 @@ public class UserController {
       return ResponseEntity.ok(BaseResponse.success("조회된 정보 없음", null));
     }
     return ResponseEntity.ok(BaseResponse.success("마이페이지 정보 조회 성공", result));
+  }
+
+  @Operation(summary = "비밀번호 수정")
+  @PatchMapping("/update-password")
+  public ResponseEntity<BaseResponse<Void>> updatePassword(
+          @RequestHeader("X-User-Id") Long userId,
+          @RequestBody PasswordUpdateRequest request
+  ) {
+    userService.updatePassword(userId, request);
+    return ResponseEntity.ok(BaseResponse.success("비밀번호 변경 완료", null));
+  }
+
+  @Operation(summary = "비밀번호 재설정")
+  @PatchMapping("/reset-password")
+  public ResponseEntity<BaseResponse<Void>> resetPassword(
+          @RequestParam String loginId,
+          @RequestBody PasswordResetRequest request
+  ) {
+    userService.resetPassword(loginId, request);
+    return ResponseEntity.ok(BaseResponse.success("비밀번호 재설정 완료", null));
   }
 }

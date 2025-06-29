@@ -67,10 +67,12 @@
       u.name_en AS nameEn,
       u.email AS email,
       u.login_id AS loginId,
+      u.login_pwd AS loginPwd,
       u.department AS department,
       u.position AS position,
       u.role_desc AS roleDesc,
       u.phone_number AS phoneNumber,
+      u.created_at AS createdAt,
       c.company_name_kr AS companyNameKr
     FROM
       users u
@@ -78,4 +80,17 @@
     WHERE
       u.user_id = #{userId}
   </select>
+
+  <!--비밀번호 수정-->
+  <update id="updatePassword">
+    UPDATE users
+    SET login_pwd = #{newPassword}
+    WHERE user_id = #{userId}
+  </update>
+
+  <!--로그인 아이디로 사용자 정보 찾기-->
+  <select id="findByLoginId" resultType="User">
+    SELECT * FROM users WHERE login_id = #{loginId}
+  </select>
+
 </mapper>

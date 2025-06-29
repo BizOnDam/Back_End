@@ -1,8 +1,11 @@
 package com.bizondam.userservice.service;
 
+import com.bizondam.common.exception.CustomException;
+import com.bizondam.userservice.dto.request.PasswordResetRequest;
 import com.bizondam.userservice.dto.request.SignUpRequest;
 import com.bizondam.userservice.entity.MyPageUserInfo;
 import com.bizondam.userservice.dto.response.SignUpResponse;
+import com.bizondam.userservice.dto.request.PasswordUpdateRequest;
 import com.bizondam.userservice.entity.RoleInCompany;
 import com.bizondam.userservice.entity.User;
 import com.bizondam.userservice.mapper.UserMapper;
@@ -12,6 +15,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import static com.bizondam.userservice.exception.UserErrorCode.INVALID_PASSWORD;
+import static com.bizondam.userservice.exception.UserErrorCode.USER_NOT_FOUND;
 
 @Service
 @Slf4j
@@ -91,5 +97,35 @@ public class UserService {
   // 사용자 정보 조회
   public MyPageUserInfo getMyPageUserInfo(Long userId) {
     return userMapper.getMyPageUserInfo(userId);
+  }
+
+  // 비밀번호 수정
+  public void updatePassword(Long userId, PasswordUpdateRequest request) {
+    MyPageUserInfo user = userMapper.getMyPageUserInfo(userId);
+    if (user == null) {
+      throw new CustomException(USER_NOT_FOUND);
+    }
+    log.info("입력 비번: {}", request.getCurrentPassword());
+    log.info("저장 비번: {}", user.getLoginPwd());
+
+    // 현재 비밀번호가 일치하는지 확인
+    if (!passwordEncoder.matches(request.getCurrentPassword(), user.getLoginPwd())) {
+      throw new CustomException(INVALID_PASSWORD);
+    }
+
+    // 새로운 비밀번호 암호화
+    String encodedNewPassword = passwordEncoder.encode(request.getNewPassword());
+    userMapper.updatePassword(userId, encodedNewPassword);
+  }
+
+  // 비밀번호 재설정
+  public void resetPassword(String loginId, PasswordResetRequest request) {
+    User user = userMapper.findByLoginId(loginId);
+    if (user == null) {
+      throw new CustomException(USER_NOT_FOUND);
+    }
+
+    String encodedNewPassword = passwordEncoder.encode(request.getNewPassword());
+    userMapper.updatePassword(user.getUserId(), encodedNewPassword);
   }
 }
