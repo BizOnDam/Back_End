@@ -257,4 +257,43 @@
         SET status = 2
         WHERE contract_id = #{contractId} AND status = 1
     </update>
+
+  <!-- 계약 담당자 정보 조회 -->
+  <select id="getSupplierInfoByBuyer" resultType="CounterpartyInfoDto">
+    SELECT u.name_kr AS nameKr,
+           u.email AS email,
+           u.phone_number AS phoneNumber,
+           u.department AS department,
+           u.position AS position
+    FROM contracts ct
+      JOIN users u ON ct.supplier_user_id = u.user_id
+    WHERE ct.contract_id = #{contractId}
+      AND ct.buyer_company_id = #{buyerCompanyId}
+  </select>
+
+  <select id="getBuyerInfoBySupplier" resultType="CounterpartyInfoDto">
+    SELECT u.name_kr AS nameKr,
+           u.email AS email,
+           u.phone_number AS phoneNumber,
+           u.department AS department,
+           u.position AS position
+    FROM contracts ct
+      JOIN users u ON ct.buyer_user_id = u.user_id
+    WHERE ct.contract_id = #{contractId}
+      AND ct.supplier_company_id = #{supplierCompanyId}
+  </select>
+
+  <select id="findContractDtoById" resultType="ContractDto">
+    SELECT contract_id,
+           buyer_company_id,
+           supplier_company_id
+    FROM contracts
+    WHERE contract_id = #{contractId}
+  </select>
+
+  <select id="findCompanyIdByUserId" resultType="long">
+    SELECT company_id
+    FROM users
+    WHERE user_id = #{userId}
+  </select>
 </mapper>

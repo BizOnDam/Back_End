@@ -5,6 +5,7 @@ import com.bizondam.contract_service.dto.ContractDto;
 import com.bizondam.contract_service.dto.ContractHistoryDto;
 import com.bizondam.contract_service.dto.ContractItemDto;
 import com.bizondam.contract_service.dto.ContractListResponseDto;
+import com.bizondam.contract_service.dto.CounterpartyInfoDto;
 import com.bizondam.contract_service.dto.TradeSummaryDto;
 import com.bizondam.contract_service.exception.ContractErrorCode;
 import com.bizondam.contract_service.mapper.ContractMapper;
@@ -76,8 +77,8 @@ public class ContractService {
     public void completeContract(Long contractId) {
         int updatedRows = contractMapper.updateContractStatusToCompleted(contractId);
         if (updatedRows == 0) {
-            // 업데이트 안되면 에러 발생: 이미 완료된 계약이거나 없는 ID
-            throw new CustomException(ContractErrorCode.CONTRACT_NOT_FOUND_OR_ALREADY_COMPLETED);
+            // 업데이트 안되면 에러 발생: 이미 완료된 계약
+            throw new CustomException(ContractErrorCode.CONTRACT_ALREADY_COMPLETED);
         }
     }
 
@@ -125,7 +126,33 @@ public class ContractService {
         return filtered;
     }
 
+    // 거래 이력
     public List<ContractHistoryDto> getContractHistoryByCompanyId(Long companyId) {
         return contractMapper.selectContractHistoryByCompanyId(companyId);
+    }
+
+    // 계약자 정보 조회
+    public CounterpartyInfoDto getCounterpartyInfo(Long contractId, Long userId) {
+        ContractDto contractDto = contractMapper.findContractDtoById(contractId);
+        if (contractDto == null) {
+            throw new CustomException(ContractErrorCode.CONTRACT_NOT_FOUND);
+        }
+
+        // 1. userId로 company_id 조회
+        Long userCompanyId = contractMapper.findCompanyIdByUserId(userId);
+        if (userCompanyId == null) {
+            throw new CustomException(ContractErrorCode.UNAUTHORIZED_ACCESS);
+        }
+
+        // 2. company_id 비교 후, 상대방 정보 조회
+        if (userCompanyId.equals(contractDto.getBuyerCompanyId())) {
+            // 내가 buyer면 supplier 정보 조회
+            return contractMapper.getSupplierInfoByBuyer(contractDto.getBuyerCompanyId(), contractId);
+        } else if (userCompanyId.equals(contractDto.getSupplierCompanyId())) {
+            // 내가 supplier면 buyer 정보 조회
+            return contractMapper.getBuyerInfoBySupplier(contractDto.getSupplierCompanyId(), contractId);
+        } else {
+            throw new CustomException(ContractErrorCode.UNAUTHORIZED_ACCESS);
+        }
     }
 }
