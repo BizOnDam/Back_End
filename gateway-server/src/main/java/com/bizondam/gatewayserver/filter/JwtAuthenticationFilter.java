@@ -7,6 +7,7 @@ import com.bizondam.common.jwt.JwtProvider;
 import com.bizondam.common.response.BaseResponse;
 import com.bizondam.gatewayserver.validator.RouteValidator;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.jsonwebtoken.Claims;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
@@ -38,6 +39,32 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
   public GatewayFilter apply(Config config) {
     return (exchange, chain) -> {
       ServerHttpRequest request = exchange.getRequest();
+      String path = request.getURI().getPath();
+
+      // 재발급 엔드포인트 식별
+      boolean isReissueAccessToken = path.contains("/reissue-access-token");
+      boolean isReissueRefreshToken = path.contains("/reissue-refresh-token");
+
+      // 재발급 요청에 대한 리프레시 토큰 검증
+      if (isReissueAccessToken || isReissueRefreshToken) {
+        String refreshToken = request.getHeaders().getFirst("X-Refresh-Token");
+        if (refreshToken == null || refreshToken.isBlank()) {
+          return onError(exchange, "Refresh token required in header", HttpStatus.UNAUTHORIZED);
+        }
+        try {
+          Claims claims = jwtProvider.getClaims(refreshToken);
+
+          // 🔽 userId를 헤더에 추가
+          ServerHttpRequest mutatedRequest = request.mutate()
+              .header("X-User-Id", String.valueOf(claims.get("userId")))
+              .build();
+          return chain.filter(exchange.mutate().request(mutatedRequest).build());
+
+        } catch (Exception e) {
+          return onError(exchange, "Invalid refresh token", HttpStatus.UNAUTHORIZED);
+        }
+      }
+
       log.info("=== [Gateway Filter] Incoming Request ===");
       log.info("  RawPath: {}", request.getURI().getRawPath());
       log.info("  Path: {}", request.getPath());

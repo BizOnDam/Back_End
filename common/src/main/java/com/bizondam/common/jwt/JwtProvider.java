@@ -48,13 +48,16 @@ public class JwtProvider {
   }
 
   // RefreshToken 생성
+  // JWT 발급 시 UTC 표준 시간 사용
   public String createRefreshToken(String subject, String tokenId) {
     Date now = new Date();
+    Date expiry = new Date(now.getTime() + refreshTokenExpireTime);
+
     return Jwts.builder()
         .setSubject(subject)
         .setId(tokenId)
         .setIssuedAt(now)
-        .setExpiration(new Date(now.getTime() + refreshTokenExpireTime))
+        .setExpiration(expiry) // UTC 기반
         .signWith(secretKey, SignatureAlgorithm.HS256)
         .compact();
   }
@@ -86,19 +89,5 @@ public class JwtProvider {
   // 토큰에서 jti 추출 (리프레시 토큰 관리용)
   public String extractTokenId(String token) {
     return getClaims(token).getId();
-  }
-
-  // signature만 검증하는 메서드
-  public Claims getClaimsIgnoreExpiration(String token) {
-    try {
-      return Jwts.parserBuilder()
-          .setSigningKey(secretKey)
-          .build()
-          .parseClaimsJws(token)
-          .getBody();
-    } catch (ExpiredJwtException e) {
-      // signature는 유효했으니 claim은 꺼낼 수 있음
-      return e.getClaims();
-    }
   }
 }
