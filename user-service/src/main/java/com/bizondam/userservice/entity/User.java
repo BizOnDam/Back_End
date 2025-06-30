@@ -23,4 +23,5 @@ public class User {
   private String authProvider;  // EMAIL
   private LocalDateTime createdAt;
   private LocalDateTime updatedAt;
+  private Boolean isDeleted;
 }

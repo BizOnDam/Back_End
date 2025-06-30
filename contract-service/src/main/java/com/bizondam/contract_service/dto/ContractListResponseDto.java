@@ -20,4 +20,5 @@ public class ContractListResponseDto {
     private Long totalPrice;
     private String contractDate;
     private String dueDate;
+    private Integer status;
 }

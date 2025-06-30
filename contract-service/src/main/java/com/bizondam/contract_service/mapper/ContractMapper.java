@@ -5,7 +5,6 @@ import com.bizondam.contract_service.dto.ContractHistoryDto;
 import com.bizondam.contract_service.dto.ContractItemDto;
 import com.bizondam.contract_service.dto.ContractListResponseDto;
 import com.bizondam.contract_service.dto.CounterpartyInfoDto;
-import feign.Contract;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -30,9 +29,6 @@ public interface ContractMapper {
 
     // 거래 완료로 업데이트
     int updateContractStatusToCompleted(@Param("contractId") Long contractId);
-
-    // 품목 리스트 조회
-    List<ContractItemDto> findContractItemsByRequestIdAndResponseId(@Param("requestId") Long requestId, @Param("responseId") Long responseId);
 
     // 계약 리스트 - 수요 기업용, 공급 기업용
     List<ContractListResponseDto> findContractsByBuyer(@Param("companyId") Long companyId, @Param("userId") Long userId);

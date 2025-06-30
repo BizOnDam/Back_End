@@ -21,6 +21,11 @@ public class SecurityConfig {
         .requestMatchers(
             "/api/contracts/{requestId}/{responseId}/generate",
             "/api/contracts/{contractId}/file-url",
+            "/api/contracts/{contractId}/complete",
+            "/api/contracts/summary",
+            "/api/contracts/list",
+            "/api/contracts/contract-summary",
+            "/api/contracts/counterparty-info/{contractId}",
             "/swagger-ui.html",
             "/swagger-ui/**",
             "/v3/api-docs/**",

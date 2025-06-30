@@ -4,7 +4,7 @@
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.bizondam.company_service.mapper.CompanyUserMapper">
-  <resultMap id="CompanyUserMap" type="CompanyUser">
+  <resultMap id="CompanyUserMap" type="CompanyUserEntity">
     <result column="user_id" property="userId"/>
     <result column="name_kr" property="nameKr"/>
     <result column="email" property="email"/>
