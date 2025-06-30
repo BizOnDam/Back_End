@@ -161,6 +161,7 @@
         c.contract_id AS contractId,
         q.request_id AS requestId,
         r.response_id AS responseId,
+        c.status AS status,
         c.supplier_company_id AS supplierCompanyId,
         r.total_price AS totalPrice,
         DATE_FORMAT(c.created_at, '%Y-%m-%d') AS contractDate,
@@ -181,6 +182,7 @@
         q.request_id AS requestId,
         r.response_id AS responseId,
         c.supplier_company_id AS supplierCompanyId,
+        c.status AS status,
         r.total_price AS totalPrice,
         DATE_FORMAT(c.created_at, '%Y-%m-%d') AS contractDate,
         q.due_date AS dueDate
@@ -283,10 +285,18 @@
       AND ct.supplier_company_id = #{supplierCompanyId}
   </select>
 
-  <select id="findContractDtoById" resultType="ContractDto">
-    SELECT contract_id,
-           buyer_company_id,
-           supplier_company_id
+  <select id="findContractDtoById" resultMap="ContractPdfResultMap">
+    SELECT
+      contract_id,
+      response_id,
+      buyer_company_id,
+      supplier_company_id,
+      buyer_user_id,
+      supplier_user_id,
+      status,
+      contract_file_url,
+      created_at AS contract_created_at,
+      updated_at AS contract_updated_at
     FROM contracts
     WHERE contract_id = #{contractId}
   </select>
@@ -296,4 +306,18 @@
     FROM users
     WHERE user_id = #{userId}
   </select>
+
+  <!-- 계약 request 상태 변경 -->
+  <update id="updateRequestStatus" parameterType="map">
+    UPDATE estimate_request
+    SET status = 3
+    WHERE request_id = #{requestId}
+  </update>
+
+  <!-- 계약 response 상태 변경 -->
+  <update id="updateResponseStatus" parameterType="map">
+    UPDATE estimate_response
+    SET status = 3
+    WHERE response_id = #{responseId}
+  </update>
 </mapper>
