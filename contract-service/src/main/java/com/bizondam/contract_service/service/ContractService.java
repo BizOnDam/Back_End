@@ -51,6 +51,7 @@ public class ContractService {
     }
 
     // 계약서 url 조회 서비스
+    @Transactional
     public String getContractFileUrlByContractId(Long contractId) {
         String url = contractMapper.findContractFileUrlByContractId(contractId);
         if (url == null) {
@@ -60,6 +61,7 @@ public class ContractService {
     }
 
     // 전체 거래 현황 조회
+    @Transactional
     public TradeSummaryDto getTradeSummary(Long companyId) {
         int inProgress = contractMapper.countContractsByStatus(companyId, 1);
         int completed = contractMapper.countContractsByStatus(companyId, 2);
@@ -74,6 +76,7 @@ public class ContractService {
     }
 
     // 계약 완료
+    @Transactional
     public void completeContract(Long contractId) {
         int updatedRows = contractMapper.updateContractStatusToCompleted(contractId);
         if (updatedRows == 0) {
@@ -83,6 +86,7 @@ public class ContractService {
     }
 
     // 계약 리스트
+    @Transactional
     public List<ContractListResponseDto> getContractList(
         Long userId, Long companyId, String role, String userRole, LocalDate date) {
 
@@ -127,11 +131,13 @@ public class ContractService {
     }
 
     // 거래 이력
+    @Transactional
     public List<ContractHistoryDto> getContractHistoryByCompanyId(Long companyId) {
         return contractMapper.selectContractHistoryByCompanyId(companyId);
     }
 
     // 계약자 정보 조회
+    @Transactional
     public CounterpartyInfoDto getCounterpartyInfo(Long contractId, Long userId) {
         ContractDto contractDto = contractMapper.findContractDtoById(contractId);
         if (contractDto == null) {
