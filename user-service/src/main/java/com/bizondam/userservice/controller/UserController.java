@@ -84,16 +84,18 @@ public class UserController {
 
   @Operation(summary = "이메일 인증 후 로그인 ID 반환", description = "이메일 인증 완료된 사용자의 로그인 ID를 반환합니다.")
   @GetMapping("/find-id")
-  public ResponseEntity<BaseResponse<LoginIdResponse>> findLoginIdByEmail(@RequestBody EmailVerifyRequest request) {
+  public ResponseEntity<BaseResponse<LoginIdResponse>> findLoginIdByEmail(
+      @RequestParam String email, @RequestParam String code
+  ) {
     // 이메일 인증 여부 확인
-    boolean isVerified = emailAuthService.isVerified(request.getEmail(), request.getCode());
+    boolean isVerified = emailAuthService.isVerified(email, code);
 
     if (!isVerified) {
       return ResponseEntity.badRequest().body(BaseResponse.fail("이메일 인증이 완료되지 않았습니다.", null));
     }
 
     // 로그인 아이디 조회
-    String loginId = userService.findLoginIdByEmail(request.getEmail());
+    String loginId = userService.findLoginIdByEmail(email);
     if (loginId == null) {
       return ResponseEntity.badRequest().body(BaseResponse.fail("해당 이메일로 가입된 사용자를 찾을 수 없습니다.", null));
     }
