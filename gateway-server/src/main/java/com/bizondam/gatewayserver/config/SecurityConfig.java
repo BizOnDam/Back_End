@@ -22,8 +22,12 @@ public class SecurityConfig {
                 "/api/auth/reissue-refresh-token",
                 "/api/users/register",
                 "/api/users/check-login-id",
-                "/api/users/email-auth",
+                "/api/users/email-auth/signup",
+                "/api/users/email-auth/find-id",
                 "/api/users/email-auth/verify",
+                "/api/users/reset-password",
+                "/api/users/find-email",
+                "/api/users/find-id",
                 "/api/companies/register",
                 "/api/companies/validate",
                 // Swagger/OpenAPI 관련 경로
