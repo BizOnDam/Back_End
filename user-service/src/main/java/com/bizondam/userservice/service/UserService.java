@@ -128,4 +128,13 @@ public class UserService {
     String encodedNewPassword = passwordEncoder.encode(request.getNewPassword());
     userMapper.updatePassword(user.getUserId(), encodedNewPassword);
   }
+
+  // 아이디 찾기
+  public String findLoginIdByEmail(String email) {
+    User user = userMapper.findByEmail(email);
+    if (user == null || user.getIsDeleted()) {
+      return null;
+    }
+    return user.getLoginId();
+  }
 }

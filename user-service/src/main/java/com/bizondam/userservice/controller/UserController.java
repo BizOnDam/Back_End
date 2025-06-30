@@ -3,6 +3,7 @@ package com.bizondam.userservice.controller;
 import com.bizondam.common.exception.CustomException;
 import com.bizondam.common.response.BaseResponse;
 import com.bizondam.userservice.dto.request.*;
+import com.bizondam.userservice.dto.response.LoginIdResponse;
 import com.bizondam.userservice.entity.MyPageUserInfo;
 import com.bizondam.userservice.dto.response.SignUpResponse;
 import com.bizondam.userservice.entity.User;
@@ -80,6 +81,26 @@ public class UserController {
       return ResponseEntity .badRequest().body(BaseResponse.fail("인증코드가 일치하지 않거나 만료되었습니다.", false));
     }
   }
+
+  @Operation(summary = "이메일 인증 후 로그인 ID 반환", description = "이메일 인증 완료된 사용자의 로그인 ID를 반환합니다.")
+  @GetMapping("/find-id")
+  public ResponseEntity<BaseResponse<LoginIdResponse>> findLoginIdByEmail(@RequestBody EmailVerifyRequest request) {
+    // 이메일 인증 여부 확인
+    boolean isVerified = emailAuthService.isVerified(request.getEmail(), request.getCode());
+
+    if (!isVerified) {
+      return ResponseEntity.badRequest().body(BaseResponse.fail("이메일 인증이 완료되지 않았습니다.", null));
+    }
+
+    // 로그인 아이디 조회
+    String loginId = userService.findLoginIdByEmail(request.getEmail());
+    if (loginId == null) {
+      return ResponseEntity.badRequest().body(BaseResponse.fail("해당 이메일로 가입된 사용자를 찾을 수 없습니다.", null));
+    }
+
+    return ResponseEntity.ok(BaseResponse.success("로그인 아이디 조회 성공", new LoginIdResponse(loginId)));
+  }
+
 
   @Operation(summary = "마이페이지 사용자 정보 조회", description = "자기 자신의 정보 조회")
   @GetMapping("/mypage-info")

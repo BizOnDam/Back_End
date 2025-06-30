@@ -93,4 +93,10 @@
     SELECT * FROM users WHERE login_id = #{loginId}
   </select>
 
+  <!-- 아이디 찾기 -->
+  <select id="findLoginIdByEmail" resultType="string">
+    SELECT login_id FROM users
+    WHERE email = #{email}
+      AND is_deleted = FALSE
+  </select>
 </mapper>

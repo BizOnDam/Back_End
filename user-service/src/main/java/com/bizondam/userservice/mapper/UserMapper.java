@@ -19,6 +19,8 @@ public interface UserMapper {
   MyPageUserInfo getMyPageUserInfo(@Param("userId") Long userId);
   // 비밀번호 변경
   void updatePassword(@Param("userId") Long userId, @Param("newPassword") String newPassword);
-  // 로그인 아이디로 사용자
+  // 로그인 아이디로 사용자 조회
   User findByLoginId(@Param("loginId") String loginId);
+  // 로그인 이메일로 사용자 조회
+  User findByEmail(@Param("email") String email);
 }
