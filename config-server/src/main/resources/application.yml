@@ -9,29 +9,32 @@ spring:
     name: config-server
 
   profiles:
-    # Git 모드로 동작
     active: git
 
   cloud:
-    compatibility-verifier:
-      enabled: false
-
     config:
       server:
-        native:
-          enabled: false        # native 모드 비활성화
         git:
-          uri: https://github.com/BizOnDam/config.git
-          default-label: ${CONFIG_LABEL:main}
-          searchPaths:
-            - config
+          uri: https://github.com/BizOnDam/Config.git
+          default-label: main
+          username: kohyun0223
+          password: ${GIT_ACCESS_TOKEN}
+
+# Jasypt 복호화 설정
+jasypt:
+  encryptor:
+    password: ${ENCRYPTOR_PASSWORD}
+    algorithm: PBEWITHHMACSHA512ANDAES_256
+    iv-generator-class-name: org.jasypt.iv.RandomIvGenerator
 
 eureka:
   client:
     register-with-eureka: true
     fetch-registry: true
     service-url:
-      defaultZone: http://eureka1:8761/eureka/,http://eureka2:8762/eureka/
+      defaultZone: http://eureka:eurekapwd@14.63.178.155:8761/eureka/,http://eureka:eurekapwd@14.63.178.155:8762/eureka/
+  instance:
+    prefer-ip-address: true #호스트 이름 대신 IP 주소를 우선으로 사용
 
 management:
   endpoints:

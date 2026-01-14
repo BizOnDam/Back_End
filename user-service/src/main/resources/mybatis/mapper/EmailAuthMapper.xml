@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bizondam.userservice.mapper.EmailAuthMapper">
+  <insert id="insertEmailAuth" parameterType="EmailAuth">
+    INSERT INTO email_auth (email, code, expired_at)
+    VALUES (#{email}, #{code}, #{expiredAt})
+  </insert>
+  <select id="findByEmailAndCode" resultType="EmailAuth">
+    SELECT id, email, code, expired_at
+    FROM email_auth
+    WHERE email = #{email} AND code = #{code}
+  </select>
+  <delete id="deleteByEmail" parameterType="string">
+    DELETE FROM email_auth WHERE email = #{email}
+  </delete>
+  <select id="existsByEmail" parameterType="string" resultType="boolean">
+    SELECT EXISTS(SELECT 1 FROM users WHERE email = #{email})
+  </select>
+</mapper>

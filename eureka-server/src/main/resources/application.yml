@@ -1,43 +1,18 @@
-# ────────────────────────────────────────────────────────────────────────────
-# 기본(8761번) 인스턴스 설정 (프로파일 지정 불필요)
 spring:
   application:
     name: eureka-server
+  profiles:
+    active: peer1
+  config:
+      import: optional:configserver:http://admin:1234@14.63.178.155:8888
+  security:
+    user:
+      name: eureka
+      password: eurekapwd
 
-server:
-  port: 8761
-
-eureka:
-  instance:
-    prefer-ip-address: true
-  client:
-    register-with-eureka: false
-    fetch-registry: false
-    service-url:
-      defaultZone: http://localhost:8761/eureka/,http://localhost:8762/eureka/
-
+# 관리용 엔드포인트(health, info, env)
 management:
   endpoints:
     web:
       exposure:
         include: health,info,env
-# ────────────────────────────────────────────────────────────────────────────
-
----
-# peer2 인스턴스(8762번) 설정
-spring:
-  config:
-    activate:
-      on-profile: peer2
-
-server:
-  port: 8762
-
-eureka:
-  instance:
-    prefer-ip-address: true
-  client:
-    register-with-eureka: false
-    fetch-registry: false
-    service-url:
-      defaultZone: http://localhost:8761/eureka/,http://localhost:8762/eureka/

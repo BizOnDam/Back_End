@@ -1,0 +1,301 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bizondam.estimateservice.mapper.EstimateRequestMapper">
+  <!-- 견적 요청서 생성 -->
+  <insert id="insertEstimateRequest" parameterType="EstimateRequestCreateDto"
+    useGeneratedKeys="true" keyProperty="requestId" keyColumn="request_id">
+    INSERT INTO estimate_request (
+      buyer_user_id, buyer_company_id, status, detail, due_date
+    ) VALUES (
+               #{buyerUserId}, #{buyerCompanyId}, 2, #{detail}, #{dueDate}
+             )
+  </insert>
+
+  <!-- 공급 업체 지정 (PATCH) -->
+  <update id="updateSupplierCompany">
+    UPDATE estimate_request
+    SET supplier_company_id = (
+      SELECT company_id
+      FROM companies
+      WHERE business_number = #{businessNumber}
+      LIMIT 1
+      )
+    WHERE request_id = #{requestId}
+  </update>
+
+  <!-- 견적 요청서 status 변경 (계약 체결/미체결) -->
+  <update id="updateRequestStatus">
+    UPDATE estimate_request
+    SET status = #{status}
+    WHERE request_id = #{requestId}
+  </update>
+
+  <!-- 아이템 id 반환 -->
+  <insert id="insertEstimateRequestItemWithReturnId"
+    parameterType="com.bizondam.estimateservice.model.EstimateRequestItem"
+    useGeneratedKeys="true" keyProperty="itemId" keyColumn="item_id">
+    INSERT INTO estimate_request_item (request_id, product_id, specification, quantity)
+    VALUES (#{requestId}, #{productId}, #{specification}, #{quantity})
+  </insert>
+
+  <!-- 계약서 메타+응답+요청 정보 조회 -->
+  <select id="findContractByRequestIdAndResponseId" resultMap="ContractResultMap" parameterType="map">
+    SELECT
+      er.request_id,
+      er.buyer_user_id,
+      er.buyer_company_id,
+      cb.company_name_kr AS buyer_company_name,
+      cb.address AS buyer_company_address,
+      cb.address_detail AS buyer_company_address_detail,
+      er.supplier_company_id,
+      cs.company_name_kr AS supplier_company_name,
+      er.status AS request_status,
+      er.detail,
+      er.due_date,
+      er.created_at AS request_created_at,
+      resp.response_id,
+      resp.supplier_user_id,
+      resp.status AS response_status,
+      resp.total_price,
+      resp.payment_terms,
+      resp.warranty,
+      resp.special_terms,
+      resp.created_at AS response_created_at,
+      bu.name_kr AS buyer_user_name,
+      bu.phone_number AS buyer_user_phone,
+      su.name_kr AS supplier_user_name,
+      su.phone_number AS supplier_user_phone,
+      c.contract_id,
+      c.created_at AS contract_created_at
+    FROM estimate_response resp
+           JOIN estimate_request er ON resp.request_id = er.request_id
+           LEFT JOIN contracts c ON c.response_id = resp.response_id
+           JOIN companies cb ON er.buyer_company_id = cb.company_id
+           JOIN companies cs ON er.supplier_company_id = cs.company_id
+           LEFT JOIN users bu ON c.buyer_user_id = bu.user_id
+           LEFT JOIN users su ON c.supplier_user_id = su.user_id
+    WHERE er.request_id = #{requestId}
+      AND resp.response_id = #{responseId}
+  </select>
+
+  <!-- 품목 리스트 조회 -->
+  <select id="findContractItemsByRequestIdAndResponseId" resultMap="ContractItemResultMap" parameterType="map">
+    SELECT
+      item.item_id AS item_item_id,
+      item.request_id AS item_request_id,
+      item.product_id AS item_product_id,
+      item.specification AS item_specification,
+      item.quantity AS item_quantity,
+      meta.category_code AS meta_category_code,
+      meta.category_name AS meta_category_name,
+      meta.detail_category_code AS meta_detail_category_code,
+      meta.detail_category_name AS meta_detail_category_name,
+      resp_item.response_item_id AS resp_item_response_item_id,
+      resp_item.response_id AS resp_item_response_id,
+      resp_item.unit_price AS resp_item_unit_price,
+      resp_item.delivery_days AS resp_item_delivery_days
+    FROM estimate_request_item item
+           LEFT JOIN estimate_response_item resp_item
+                     ON item.item_id = resp_item.item_id AND resp_item.response_id = #{responseId}
+           LEFT JOIN product_meta_batch meta
+                     ON item.product_id = meta.product_id
+    WHERE item.request_id = #{requestId}
+  </select>
+
+  <!-- requestId만 있는 경우 request 조회 -->
+  <select id="findRequestByRequestIdOnly" resultMap="ContractResultMap">
+    SELECT
+      er.request_id,
+      er.buyer_user_id,
+      er.buyer_company_id,
+      cb.company_name_kr AS buyer_company_name,
+      er.supplier_company_id,
+      cs.company_name_kr AS supplier_company_name,
+      er.status AS request_status,
+      er.detail,
+      er.due_date,
+      er.created_at AS request_created_at
+    FROM estimate_request er
+           JOIN companies cb ON er.buyer_company_id = cb.company_id
+           LEFT JOIN companies cs ON er.supplier_company_id = cs.company_id
+    WHERE er.request_id = #{requestId}
+  </select>
+
+  <!-- requestId만 있는 경우 item 조회 -->
+  <select id="findRequestItemsByRequestIdOnly" resultMap="ContractItemResultMap">
+    SELECT
+      item.item_id AS item_item_id,
+      item.request_id AS item_request_id,
+      item.product_id AS item_product_id,
+      item.specification AS item_specification,
+      item.quantity AS item_quantity,
+      meta.category_code AS meta_category_code,
+      meta.category_name AS meta_category_name,
+      meta.detail_category_code AS meta_detail_category_code,
+      meta.detail_category_name AS meta_detail_category_name
+    FROM estimate_request_item item
+           LEFT JOIN product_meta_batch meta ON item.product_id = meta.product_id
+    WHERE item.request_id = #{requestId}
+  </select>
+
+  <!-- 수요기업용 리스트 조회(CEO) -->
+  <select id="selectRequestsByBuyerCompanyAndUser" resultMap="ContractResultMap" parameterType="map">
+    SELECT
+      er.request_id,
+      er.buyer_user_id,
+      er.buyer_company_id,
+      cb.company_name_kr AS buyer_company_name,
+      er.supplier_company_id,
+      cs.company_name_kr AS supplier_company_name,
+      er.status AS request_status,
+      er.detail,
+      er.due_date,
+      er.created_at AS request_created_at,
+      resp.response_id,
+      resp.supplier_user_id,
+      resp.status AS response_status,
+      resp.total_price,
+      resp.payment_terms,
+      resp.warranty,
+      resp.special_terms,
+      resp.created_at AS response_created_at
+    FROM estimate_request er
+           LEFT JOIN estimate_response resp ON er.request_id = resp.request_id
+           LEFT JOIN companies cb ON er.buyer_company_id = cb.company_id
+           LEFT JOIN companies cs ON er.supplier_company_id = cs.company_id
+    WHERE er.buyer_company_id = #{companyId}
+      AND er.buyer_user_id = #{userId}
+    ORDER BY er.created_at DESC
+  </select>
+
+  <!-- 공급기업용 리스트 조회(STAFF) -->
+  <select id="selectRequestsBySupplierCompanyAndUser" resultMap="ContractResultMap" parameterType="map">
+    SELECT
+      er.request_id,
+      er.buyer_user_id,
+      er.buyer_company_id,
+      cb.company_name_kr AS buyer_company_name,
+      er.supplier_company_id,
+      cs.company_name_kr AS supplier_company_name,
+      er.status AS request_status,
+      er.detail,
+      er.due_date,
+      er.created_at AS request_created_at,
+      resp.response_id,
+      resp.supplier_user_id,
+      resp.status AS response_status,
+      resp.total_price,
+      resp.payment_terms,
+      resp.warranty,
+      resp.special_terms,
+      resp.created_at AS response_created_at
+    FROM estimate_request er
+           LEFT JOIN estimate_response resp ON er.request_id = resp.request_id
+           LEFT JOIN companies cb ON er.buyer_company_id = cb.company_id
+           LEFT JOIN companies cs ON er.supplier_company_id = cs.company_id
+    WHERE er.supplier_company_id = #{companyId}
+      AND resp.supplier_user_id = #{userId}
+    ORDER BY er.created_at DESC
+  </select>
+
+  <!-- 수요기업용 리스트 조회(STAFF) -->
+  <select id="selectRequestsByBuyerCompany" resultMap="ContractResultMap" parameterType="long">
+    SELECT
+      er.request_id,
+      er.buyer_user_id,
+      er.buyer_company_id,
+      cb.company_name_kr AS buyer_company_name,
+      er.supplier_company_id,
+      cs.company_name_kr AS supplier_company_name,
+      er.status AS request_status,
+      er.detail,
+      er.due_date,
+      er.created_at AS request_created_at,
+      resp.response_id,
+      resp.supplier_user_id,
+      resp.status AS response_status,
+      resp.total_price,
+      resp.payment_terms,
+      resp.warranty,
+      resp.special_terms,
+      resp.created_at AS response_created_at
+    FROM estimate_request er
+           LEFT JOIN estimate_response resp ON er.request_id = resp.request_id
+           LEFT JOIN companies cb ON er.buyer_company_id = cb.company_id
+           LEFT JOIN companies cs ON er.supplier_company_id = cs.company_id
+    WHERE er.buyer_company_id = #{companyId}
+    ORDER BY er.created_at DESC
+  </select>
+
+  <!-- 공급기업용 리스트 조회(STAFF) -->
+  <select id="selectRequestsBySupplierCompany" resultMap="ContractResultMap" parameterType="long">
+    SELECT
+      er.request_id,
+      er.buyer_user_id,
+      er.buyer_company_id,
+      cb.company_name_kr AS buyer_company_name,
+      er.supplier_company_id,
+      cs.company_name_kr AS supplier_company_name,
+      er.status AS request_status,
+      er.detail,
+      er.due_date,
+      er.created_at AS request_created_at,
+      resp.response_id,
+      resp.supplier_user_id,
+      resp.status AS response_status,
+      resp.total_price,
+      resp.payment_terms,
+      resp.warranty,
+      resp.special_terms,
+      resp.created_at AS response_created_at
+    FROM estimate_request er
+           LEFT JOIN estimate_response resp ON er.request_id = resp.request_id
+           LEFT JOIN companies cb ON er.buyer_company_id = cb.company_id
+           LEFT JOIN companies cs ON er.supplier_company_id = cs.company_id
+    WHERE er.supplier_company_id = #{companyId}
+    ORDER BY er.created_at DESC
+  </select>
+
+  <!-- ResultMap -->
+  <resultMap id="ContractResultMap" type="ContractDto">
+    <id property="requestId" column="request_id"/>
+    <result property="buyerUserId" column="buyer_user_id"/>
+    <result property="buyerCompanyId" column="buyer_company_id"/>
+    <result property="supplierCompanyId" column="supplier_company_id"/>
+    <result property="requestStatus" column="request_status"/>
+    <result property="detail" column="detail"/>
+    <result property="dueDate" column="due_date"/>
+    <result property="requestCreatedAt" column="request_created_at"/>
+    <result property="responseId" column="response_id"/>
+    <result property="supplierUserId" column="supplier_user_id"/>
+    <result property="responseStatus" column="response_status"/>
+    <result property="totalPrice" column="total_price"/>
+    <result property="paymentTerms" column="payment_terms"/>
+    <result property="warranty" column="warranty"/>
+    <result property="specialTerms" column="special_terms"/>
+    <result property="responseCreatedAt" column="response_created_at"/>
+    <result property="buyerCompanyName" column="buyer_company_name"/>
+    <result property="supplierCompanyName" column="supplier_company_name"/>
+    <result property="contractId" column="contract_id"/>
+    <result property="contractCreatedAt" column="contract_created_at"/>
+  </resultMap>
+
+  <resultMap id="ContractItemResultMap" type="ContractItemDto">
+    <id property="itemId" column="item_item_id"/>
+    <result property="requestId" column="item_request_id"/>
+    <result property="productId" column="item_product_id"/>
+    <result property="specification" column="item_specification"/>
+    <result property="quantity" column="item_quantity"/>
+    <result property="categoryCode" column="meta_category_code"/>
+    <result property="categoryName" column="meta_category_name"/>
+    <result property="detailCategoryCode" column="meta_detail_category_code"/>
+    <result property="detailCategoryName" column="meta_detail_category_name"/>
+    <result property="responseItemId" column="resp_item_response_item_id"/>
+    <result property="responseId" column="resp_item_response_id"/>
+    <result property="unitPrice" column="resp_item_unit_price"/>
+    <result property="deliveryDays" column="resp_item_delivery_days"/>
+  </resultMap>
+</mapper>

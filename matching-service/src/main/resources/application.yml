@@ -1,0 +1,47 @@
+server:
+  port: 8084
+
+jasypt:
+  encryptor:
+    password: ${ENCRYPTOR_PASSWORD}
+
+spring:
+  main:
+    allow-bean-definition-overriding: true
+  application:
+    name: matching-service
+  profiles:
+    active: dev
+  config:
+    import: optional:configserver:http://admin:1234@14.63.178.155:8888
+
+  jmx:
+    enabled: false # 로그 끄기
+
+mybatis:
+  mapper-locations: classpath:mybatis/mapper/*.xml
+
+openai:
+  api-key: ${OPENAI_API_KEY}
+  model: gpt-3.5-turbo
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+
+logging:
+  level:
+    root: DEBUG
+    com.bizondam: DEBUG
+    sun.rmi: ERROR
+    javax.management.remote.rmi: ERROR
+    sun.rmi.transport.tcp: ERROR
+    sun.rmi.loader: ERROR
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health

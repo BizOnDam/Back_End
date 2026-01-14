@@ -1,0 +1,24 @@
+server:
+  port: 8083
+
+jasypt:
+  encryptor:
+    password: ${ENCRYPTOR_PASSWORD}
+
+spring:
+  application:
+    name: estimate-service
+  profiles:
+    active: dev
+  config:
+    import: optional:configserver:http://admin:1234@14.63.178.155:8888
+
+mybatis:
+  mapper-locations: classpath*:mybatis/mapper/*.xml
+  type-aliases-package: com.bizondam.estimateservice.dto
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true

@@ -1,0 +1,20 @@
+server:
+  port: 8761
+
+spring:
+  config:
+    activate:
+      on-profile: peer1
+  security:
+    user:
+      name: eureka
+      password: eurekapwd
+
+eureka:
+  instance:
+    prefer-ip-address: true # 호스트명 대신 IP 주소 우선 사용
+  client:
+    register-with-eureka: true  # Eureka 서버 클러스터에 자신을 등록할지 여부
+    fetch-registry: true    # 다른 피어의 레지스트리 정보를 주기적으로 가져올지 여부
+    service-url:
+      defaultZone: http://eureka:eurekapwd@14.63.178.155:8762/eureka/

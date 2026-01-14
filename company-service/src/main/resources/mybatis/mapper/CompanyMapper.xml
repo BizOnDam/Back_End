@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bizondam.company_service.mapper.CompanyMapper">
+
+  <!-- 사업자번호 기준 조회 -->
+  <select id="selectByBusinessNumber" parameterType="string" resultMap="CompanyResultMap">
+    SELECT * FROM companies WHERE business_number = #{businessNumber}
+  </select>
+
+  <!-- insert 후 생성된 PK를 companyId 필드에 설정 -->
+  <insert id="insertCompany"
+    parameterType="Company"
+    useGeneratedKeys="true"
+    keyProperty="companyId"
+    keyColumn="company_id">
+    INSERT INTO companies
+    (company_name_kr, company_name_en,
+     ceo_name_kr, ceo_name_en,
+     start_date, business_number,
+     phone_number, fax_number,
+     postcode, address, address_detail,
+     business_type, created_at)
+    VALUES
+      (#{companyNameKr}, #{companyNameEn},
+       #{ceoNameKr}, #{ceoNameEn},
+       #{startDate}, #{businessNumber},
+       #{phoneNumber}, #{faxNumber},
+       #{postcode}, #{address}, #{addressDetail},
+       #{businessType}, NOW())
+  </insert>
+
+  <resultMap id="CompanyResultMap" type="Company">
+    <id property="companyId" column="company_id" />
+    <result property="companyNameKr" column="company_name_kr" />
+    <result property="companyNameEn" column="company_name_en" />
+    <result property="ceoNameKr" column="ceo_name_kr" />
+    <result property="ceoNameEn" column="ceo_name_en" />
+    <result property="startDate" column="start_date" />
+    <result property="businessNumber" column="business_number" />
+    <result property="phoneNumber" column="phone_number" />
+    <result property="faxNumber" column="fax_number" />
+    <result property="postcode" column="postcode" />
+    <result property="address" column="address" />
+    <result property="addressDetail" column="address_detail" />
+    <result property="businessType" column="business_type" />
+    <result property="createdAt" column="created_at" />
+  </resultMap>
+
+  <!-- 전체 조회 -->
+  <select id="selectAllCompanies" resultMap="CompanyResultMap">
+    SELECT * FROM companies
+  </select>
+
+  <!-- 수정 -->
+  <update id="updateCompany" parameterType="Company">
+    UPDATE companies
+    SET company_name_kr  = #{companyNameKr},
+        company_name_en  = #{companyNameEn},
+        ceo_name_kr      = #{ceoNameKr},
+        ceo_name_en      = #{ceoNameEn},
+        start_date       = #{startDate},
+        business_number  = #{businessNumber},
+        phone_number     = #{phoneNumber},
+        fax_number       = #{faxNumber},
+        postcode         = #{postcode},
+        address          = #{address},
+        address_detail   = #{addressDetail},
+        business_type    = #{businessType}
+    WHERE company_id = #{companyId}
+  </update>
+
+  <!-- 삭제 -->
+  <delete id="deleteCompany" parameterType="long">
+    DELETE FROM companies
+    WHERE company_id = #{companyId}
+  </delete>
+
+  <!--회사 정보 조회-->
+  <select id="findById" parameterType="long" resultMap="CompanyResultMap">
+    SELECT *
+    FROM companies
+    WHERE company_id = #{companyId}
+  </select>
+</mapper>

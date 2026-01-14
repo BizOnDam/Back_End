@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bizondam.matching_service.mapper.SupplierRecommendationMapper">
+
+    <!-- 1. 견적 요청 품목 조회 -->
+    <select id="findEstimateItemsByRequestId"
+            resultType="com.bizondam.matching_service.dto.EstimateItemDto">
+        SELECT
+            ei.product_id              AS productId,
+            pm.detail_category_code    AS detailCategoryCode,
+            ei.specification           AS specification,
+            ei.quantity                AS quantity,
+            er.created_at              AS requestDate,
+            er.due_date                AS dueDate
+        FROM estimate_request_item ei
+            JOIN estimate_request      er ON ei.request_id = er.request_id
+            JOIN product_meta_batch    pm ON ei.product_id  = pm.product_id
+        WHERE ei.request_id = #{requestId}
+    </select>
+
+    <!-- 2. 추천 조건에 맞는 공급기업 조회 -->
+    <select id="findSuppliersByConditions"
+            parameterType="com.bizondam.matching_service.dto.SupplierSearchConditionDto"
+            resultType="com.bizondam.matching_service.dto.SupplierDto">
+        SELECT DISTINCT
+            ph.product_id           AS productId,
+            ph.supplier_bizno       AS supplierBizno,
+            ph.supplier_name        AS supplierName,
+            MAX(ph.quantity)        AS matchedQuantity,
+            MIN(DATEDIFF(pc.delivery_deadline, pc.first_contract_date))  AS leadTimeDays,
+            COUNT(ph2.contract_id)  AS transactionCount
+        FROM procurement_history ph
+            JOIN procurement_contract       pc ON ph.contract_id = pc.contract_id
+            JOIN product_meta               pm ON ph.product_id = pm.product_id
+            LEFT JOIN procurement_history   ph2 ON ph2.supplier_bizno = ph.supplier_bizno
+                AND ph2.product_id = ph.product_id
+        WHERE pm.detail_category_code = #{condition.detailCategoryCode}
+            AND ph.quantity >= #{condition.quantity}
+            AND DATEDIFF(pc.delivery_deadline, pc.first_contract_date) &lt;= #{condition.maxLeadDays}
+        GROUP BY ph.product_id, ph.supplier_bizno, ph.supplier_name
+    </select>
+
+    <select id="findMetricsByBiznosAndRequest"
+            parameterType="map"
+            resultType="com.bizondam.matching_service.dto.SupplierMetricDto">
+        SELECT
+        pmb.detail_category_name                           AS detailCategoryName,
+        ph.supplier_bizno                                  AS supplierBizno,
+        ph.supplier_name                                   AS supplierName,
+        MAX(ph.quantity)                                   AS matchedQuantity,
+        MIN(DATEDIFF(pc.delivery_deadline, pc.first_contract_date)) AS leadTimeDays,
+        COUNT(*)                                           AS transactionCount
+        FROM procurement_history ph
+        JOIN procurement_contract pc
+        ON ph.contract_id = pc.contract_id
+        JOIN product_meta pm
+        ON ph.product_id = pm.product_id
+        JOIN product_meta_batch pmb
+        ON pm.detail_category_code = pmb.detail_category_code
+        JOIN estimate_request_item ei
+        ON pmb.product_id = ei.product_id
+        AND ei.request_id = #{requestId}
+        WHERE ph.supplier_bizno IN
+        <foreach collection="biznos" item="b" open="(" separator="," close=")">
+            #{b}
+        </foreach>
+        GROUP BY
+        pmb.detail_category_name,
+        ph.supplier_bizno,
+        ph.supplier_name
+    </select>
+
+</mapper>

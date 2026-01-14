@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bizondam.estimateservice.mapper.EstimateResponseMapper">
+  <!-- 1. 견적 응답 생성 -->
+  <insert id="insertEstimateResponse" parameterType="EstimateResponseCreateDto"
+    useGeneratedKeys="true" keyProperty="responseId" keyColumn="response_id">
+    INSERT INTO estimate_response (
+      request_id, supplier_user_id, status, total_price, payment_terms, warranty, special_terms
+    ) VALUES (
+               #{requestId}, #{supplierUserId}, 2, #{totalPrice}, #{paymentTerms}, #{warranty}, #{specialTerms}
+             )
+  </insert>
+
+  <!-- 2. 견적 응답 품목 생성 -->
+  <insert id="insertEstimateResponseItem" parameterType="map">
+    INSERT INTO estimate_response_item (
+      response_id, item_id, unit_price, delivery_days
+    ) VALUES (
+               #{responseId}, #{item.itemId}, #{item.unitPrice}, #{item.deliveryDays}
+             )
+  </insert>
+
+  <!-- 3. 견적 응답 status 변경 (계약 체결/미체결) -->
+  <update id="updateResponseStatus">
+    UPDATE estimate_response
+    SET status = #{status}
+    WHERE response_id = #{responseId}
+  </update>
+
+  <!-- 4. requestId로 responseId 조회 -->
+  <select id="findResponseIdByRequestId" parameterType="long" resultType="long">
+    SELECT response_id FROM estimate_response WHERE request_id = #{requestId}
+  </select>
+</mapper>

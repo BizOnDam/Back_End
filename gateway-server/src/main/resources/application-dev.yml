@@ -4,4 +4,4 @@ spring:
       on-profile: dev    # --spring.profiles.active=dev 로 실행될 때만 적용
 
     # dev 브랜치(dev 레이블)에서 설정을 가져오도록 override
-    import: "optional:configserver:http://config:8888?label=dev"
+    import: optional:configserver:http://config:8888?label=dev

@@ -1,7 +1,7 @@
 plugins {
     id 'java'
     id 'org.springframework.boot' version '3.4.5'
-    id 'io.spring.dependency-management' version '1.0.15.RELEASE'
+    id 'io.spring.dependency-management' version '1.1.0'
 }
 
 // 루트에서 빌드 JAR 비활성화
@@ -9,28 +9,25 @@ bootJar.enabled = false
 jar.enabled     = false
 
 allprojects {
-    group = 'com.msa'
-
     repositories {
         mavenCentral()
-        gradlePluginPortal()  // 플러그인 해석을 위해
+        gradlePluginPortal()
+        maven { url "https://jitpack.io" }
     }
 }
 
 subprojects {
     apply plugin: 'java'
-    apply plugin: 'org.springframework.boot'
     apply plugin: 'io.spring.dependency-management'
+
+    group = 'com.bizondam'
+    version = '0.0.1-SNAPSHOT'
 
     java {
         toolchain {
             languageVersion = JavaLanguageVersion.of(21)
         }
     }
-
-    // 서브프로젝트는 bootJar 생성, 일반 jar 비활성
-    bootJar.enabled = true
-    jar.enabled     = false
 
     ext {
         set('springCloudVersion', "2024.0.1")
@@ -42,19 +39,55 @@ subprojects {
         }
     }
 
-    dependencies {
-        implementation 'org.springframework.boot:spring-boot-starter'
-        implementation 'org.springframework.boot:spring-boot-starter-actuator'
-        implementation 'org.springframework.boot:spring-boot-starter-validation'
-        testImplementation 'org.springframework.boot:spring-boot-starter-test'
-
-        compileOnly      'org.projectlombok:lombok'
-        annotationProcessor 'org.projectlombok:lombok'
-    }
-
     dependencyManagement {
         imports {
             mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
         }
+    }
+
+    if (project.name == 'common') {
+        bootJar.enabled = false
+        jar.enabled     = true
+
+        dependencies {
+            implementation 'org.springframework.boot:spring-boot-starter:3.0.4'
+            implementation 'org.projectlombok:lombok:1.18.30'
+            annotationProcessor 'org.projectlombok:lombok:1.18.30'
+
+            //jwt
+            implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+            implementation 'io.jsonwebtoken:jjwt-impl:0.11.5'
+            implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+        }
+    } else {
+        apply plugin: 'org.springframework.boot'
+
+        bootJar.enabled = true
+        jar.enabled     = false
+
+        dependencies {
+            implementation 'org.springframework.boot:spring-boot-starter'
+            implementation 'org.springframework.boot:spring-boot-starter-actuator'
+            implementation 'org.springframework.boot:spring-boot-starter-validation'
+            implementation 'com.github.ulisesbocchio:jasypt-spring-boot-starter:3.0.4'
+            implementation "org.springframework.boot:spring-boot-starter-security"
+            testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+            compileOnly      'org.projectlombok:lombok:1.18.30'
+            annotationProcessor 'org.projectlombok:lombok:1.18.30'
+
+            // jwt
+            implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+            implementation 'io.jsonwebtoken:jjwt-impl:0.11.5'
+            implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+        }
+    }
+
+    tasks.withType(Test) {
+        useJUnitPlatform()
+    }
+
+    tasks.withType(JavaCompile).configureEach {
+        options.encoding = 'UTF-8'
     }
 }

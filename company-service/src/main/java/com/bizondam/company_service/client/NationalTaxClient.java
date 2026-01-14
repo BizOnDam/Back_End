@@ -1,16 +1,15 @@
 package com.bizondam.company_service.client;
 
-import com.bizondam.company_service.dto.CompanyValidationRequestDto;
+import com.bizondam.company_service.dto.CompanyValidationRequest;
 import com.fasterxml.jackson.databind.JsonNode;
+import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
-
-import java.util.List;
-import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
@@ -19,28 +18,28 @@ public class NationalTaxClient {
     @Value("${national-tax.api-url}")
     private String apiUrl;
 
-    @Value("${national-tax.service-key}")
+    @Value("${NATIONAL_TAX_API_KEY}")
     private String serviceKey;
 
-    // HTTP 요청 처리
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate;
 
-    // TODO 컨피그 연결하면 아래 코드로 수정
-//    private final RestTemplate restTemplate;
-
-    public boolean verify(CompanyValidationRequestDto dto) {
+    public boolean verify(CompanyValidationRequest dto) {
         // 헤더 설정
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setAccept(List.of(MediaType.APPLICATION_JSON));
         headers.set("Authorization", "Infuser " + serviceKey);
 
-
         Map<String, Object> business = Map.of(
-                "b_no", dto.getB_no(),
-                "start_dt", dto.getStart_dt(),
-                "p_nm", dto.getP_nm(),
-                "b_nm", dto.getB_nm()
+            "b_no", dto.getB_no(),
+            "start_dt", dto.getStart_dt(),
+            "p_nm", dto.getP_nm(),
+            "p_nm2", "",
+            "b_nm", dto.getB_nm(),
+            "corp_no", "",
+            "b_sector", "",
+            "b_type", "",
+            "b_adr", ""
         );
 
         // 요청 본문 설정
@@ -52,19 +51,19 @@ public class NationalTaxClient {
         try {
             // API 호출
             ResponseEntity<JsonNode> response = restTemplate.exchange(
-                    apiUrl,
-                    HttpMethod.POST,
-                    request,
-                    JsonNode.class
+                apiUrl,
+                HttpMethod.POST,
+                request,
+                JsonNode.class
             );
 
             System.out.println("▶ 응답 결과: " + response.getBody());
 
             // 데이터에서 상태코드 추출 및 확인
             JsonNode validCode = response.getBody()
-                    .path("data")
-                    .get(0)
-                    .path("valid");
+                .path("data")
+                .get(0)
+                .path("valid");
 
             return "01".equals(validCode.asText());
 

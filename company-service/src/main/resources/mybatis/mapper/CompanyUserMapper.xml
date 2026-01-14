@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bizondam.company_service.mapper.CompanyUserMapper">
+  <resultMap id="CompanyUserMap" type="CompanyUserEntity">
+    <result column="user_id" property="userId"/>
+    <result column="name_kr" property="nameKr"/>
+    <result column="email" property="email"/>
+    <result column="phone_number" property="phoneNumber"/>
+    <result column="department" property="department"/>
+    <result column="position" property="position"/>
+    <result column="role_desc" property="roleDesc"/>
+    <result column="role_in_company" property="roleInCompany"/>
+    <result column="created_at" property="createdAt"/>
+    <result column="is_deleted" property="deleted"/>
+  </resultMap>
+
+  <!-- 회사 내 모든 직원 조회 -->
+  <select id="selectUsersByCompany" resultMap="CompanyUserMap">
+    SELECT user_id, company_id, email, login_id, name_kr,
+           department, position, role_desc, phone_number,
+           role_in_company, created_at, is_deleted
+    FROM users
+    WHERE company_id = #{companyId}
+      AND is_deleted = FALSE
+  </select>
+
+  <!-- 특정 직원 상세 조회 -->
+  <select id="selectUserByIdAndCompany" resultMap="CompanyUserMap">
+    SELECT user_id, company_id, email, login_id, name_kr,
+           department, position, role_desc, phone_number,
+           role_in_company, created_at, is_deleted
+    FROM users
+    WHERE user_id = #{userId}
+      AND company_id = #{companyId}
+      AND is_deleted = FALSE
+  </select>
+
+  <!-- 직원 소프트 삭제 -->
+  <update id="deleteStaff">
+    UPDATE users
+    SET is_deleted = TRUE
+    WHERE user_id = #{userId}
+  </update>
+
+  <!-- 직원 정보 수정 -->
+  <update id="updateStaffInfo">
+    UPDATE users
+    SET department = #{department},
+        position = #{position},
+        role_desc = #{roleDesc},
+        updated_at = #{updatedAt}
+    WHERE user_id = #{userId} AND company_id = #{companyId}
+  </update>
+
+  <!-- CEO 권한 위임 -->
+  <update id="updateRoleInCompany">
+    UPDATE users
+    SET role_in_company = #{roleInCompany},
+        updated_at = #{updatedAt}
+    WHERE user_id = #{userId}
+  </update>
+</mapper>

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bizondam.userservice.mapper.UserMapper">
+
+  <!-- 회사별 사용자 수 조회 -->
+  <select id="countByCompanyId" parameterType="Long" resultType="int">
+    SELECT COUNT(*)
+    FROM users
+    WHERE company_id = #{companyId}
+  </select>
+
+  <!-- 신규 사용자 등록 -->
+  <insert id="insertUser"
+    parameterType="User"
+    useGeneratedKeys="true"
+    keyProperty="userId"
+    keyColumn="user_id">
+    INSERT INTO users (
+      company_id,
+      email,
+      login_id,
+      login_pwd,
+      name_kr,
+      name_en,
+      department,
+      position,
+      role_desc,
+      phone_number,
+      role_in_company,
+      is_verified,
+      auth_provider,
+      created_at
+    ) VALUES (
+               #{companyId},
+               #{email},
+               #{loginId},
+               #{loginPwd},
+               #{nameKr},
+               #{nameEn},
+               #{department},
+               #{position},
+               #{roleDesc},
+               #{phoneNumber},
+               #{roleInCompany, jdbcType=VARCHAR},
+               #{isVerified},
+               #{authProvider},
+               #{createdAt}
+             )
+  </insert>
+
+  <!-- 로그인 아이디 중복 여부 조회 -->
+  <select id="countByLoginId" parameterType="string" resultType="int">
+    SELECT COUNT(*) FROM users WHERE login_id = #{loginId}
+  </select>
+
+  <!-- 휴대폰 번호로 중복 여부 조회 -->
+  <select id="existsByPhoneNumber" parameterType="string" resultType="boolean">
+    SELECT EXISTS(SELECT 1 FROM users WHERE phone_number = #{phoneNumber})
+  </select>
+
+  <!-- 사용자 정보 조회 -->
+  <select id="getMyPageUserInfo" parameterType="Long" resultType="MyPageUserInfo">
+    SELECT
+      u.name_kr AS nameKr,
+      u.name_en AS nameEn,
+      u.email AS email,
+      u.login_id AS loginId,
+      u.login_pwd AS loginPwd,
+      u.department AS department,
+      u.position AS position,
+      u.role_desc AS roleDesc,
+      u.phone_number AS phoneNumber,
+      u.created_at AS createdAt,
+      c.company_name_kr AS companyNameKr
+    FROM
+      users u
+      JOIN companies c ON u.company_id = c.company_id
+    WHERE
+      u.user_id = #{userId}
+  </select>
+
+  <!--비밀번호 수정-->
+  <update id="updatePassword">
+    UPDATE users
+    SET login_pwd = #{newPassword}
+    WHERE user_id = #{userId}
+  </update>
+
+  <!--로그인 아이디로 사용자 정보 찾기-->
+  <select id="findByLoginId" resultType="User">
+    SELECT * FROM users WHERE login_id = #{loginId}
+  </select>
+
+  <!-- 아이디 찾기 -->
+  <select id="findLoginIdByEmail" resultType="string">
+    SELECT login_id FROM users
+    WHERE email = #{email}
+      AND is_deleted = FALSE
+  </select>
+</mapper>

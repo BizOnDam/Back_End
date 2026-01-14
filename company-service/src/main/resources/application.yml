@@ -1,48 +1,34 @@
+server:
+  port: 8082
+
+jasypt:
+  encryptor:
+    password: ${ENCRYPTOR_PASSWORD}
+
 spring:
   application:
-    name: company-service # 마이크로서비스 이름
-  datasource:
-    url: jdbc:mysql://localhost:3306/bizondam
-    username: root
-    password: Qlvh0423!
-  jpa:
-    hibernate:
-      ddl-auto: none  # DB 구조를 자동 생성/변겅 안 함
-    show-sql: true  # 콘솔에 SQL 쿼리 로그 출력
-
-  # 컨피그 잠깐 끄기
+    name: company-service
+  profiles:
+    active: dev
+  config:
+    import: optional:configserver:http://admin:1234@14.63.178.155:8888
   cloud:
-    config:
-      enabled: false
+    circuitbreaker:
+      resilience4j:
+        enabled: true
 
-# Eureka 서버 등록 설정
-eureka:
-  client:
-    enabled: false
-#    service-url:
-#      defaultZone: http://localhost:8761/eureka/
-#  instance:
-#    prefer-ip-address: true # IP 주고 기반으로 서비스 주소 지정
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: "*"  # 모니터링 엔드포인트 활성화
+mybatis:
+  mapper-locations: classpath:mybatis/mapper/*.xml
+  type-aliases-package: com.bizondam.company_service.entity
 
 # API 키 등록
 national-tax:
   api-url: https://api.odcloud.kr/api/nts-businessman/v1/validate
-  service-key: "nrIaYF70BLc+Bv+Z4enmLXpYabahSv48DLqbb/DRjz3c5ET7PUp4HenOLmrVNJER0Qv0DntIOiSvCdWecnVSXg=="
+  service-key: ${NATIONAL_TAX_API_KEY}
   return-type: JSON
 
-
-# TODO 스웨거 최상위 파일로 옮기기
 springdoc:
+  api-docs:
+    enabled: true
   swagger-ui:
-    path: /swagger-ui.html # swagger-ui 접근 경로에 대한 별칭, 해당 주소로 접속해도 http://localhost:8080/swagger-ui/index.html로 리다이렉션 됨.
-    groups-order: DESC # path, query, body, response 순으로 출력
-    tags-sorter: alpha # 태그를 알파벳 순으로 정렬
-    operations-sorter: method  # delete - get - patch - post - put 순으로 정렬, alpha를 사용하면 알파벳 순으로 정렬 가능
-  paths-to-match:
-    - /api/** # swagger-ui에 표시할 api의 엔드포인트 패턴
+    enabled: true
